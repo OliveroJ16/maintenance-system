@@ -11,18 +11,17 @@ import (
 )
 
 func Connect(cfg *config.Config) *sql.DB {
-    dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true",
-        cfg.DBUser, cfg.DBPass, cfg.DBHost, cfg.DBName)
+    connectionURL := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", cfg.DBUser, cfg.DBPass, cfg.DBHost, cfg.DBName)
 
-    db, err := sql.Open("mysql", dsn)
+    database, err := sql.Open("mysql", connectionURL)
     if err != nil {
         log.Fatalf("Failed to open database connection: %v", err)
     }
 
-    if err := db.Ping(); err != nil {
+    if err := database.Ping(); err != nil {
         log.Fatalf("Failed to connect to the database: %v", err)
     }
 
     log.Printf("Successfully connected to the database %s", cfg.DBName)
-    return db
+    return database
 }
