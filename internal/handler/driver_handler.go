@@ -18,19 +18,29 @@ func NewDriverHandler(driverService *service.DriverService) *DriverHandler {
 }
 
 func (handler *DriverHandler) RegisterDriver(response http.ResponseWriter, request *http.Request) {
-    var driver model.Driver
+    response.Header().Set("Content-Type", "application/json")
 
+    var driver model.Driver
     if err := json.NewDecoder(request.Body).Decode(&driver); err != nil {
-        http.Error(response, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+        response.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(response).Encode(map[string]string{
+            "error": fmt.Sprintf("Invalid request body: %v", err),
+        })
         return
     }
 
     id, err := handler.driverService.RegisterDriver(&driver)
     if err != nil {
-        http.Error(response, fmt.Sprintf("Error creating driver: %v", err), http.StatusInternalServerError)
+        response.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(response).Encode(map[string]string{
+            "error": fmt.Sprintf("Error creating driver: %v", err),
+        })
         return
     }
 
     response.WriteHeader(http.StatusCreated)
-    fmt.Fprintf(response, `{"message":"Driver created successfully","id":%d}`, id)
+    json.NewEncoder(response).Encode(map[string]interface{}{
+        "message": "Driver created successfully",
+        "id":      id,
+    })
 }
