@@ -25,7 +25,7 @@ func main() {
     driverHandler := handler.NewDriverHandler(driverService)
 
     router := http.NewServeMux()
-    router.HandleFunc("/drivers", driverHandler.RegisterDriver)
+    router.HandleFunc("/drivers", driverHandler.Drivers)
 
     address := fmt.Sprintf("0.0.0.0:%s", cfg.Port)
     log.Printf("Server started at http://%s", address)
