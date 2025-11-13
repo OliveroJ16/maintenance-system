@@ -1,0 +1,108 @@
+<div class="header">
+    <div class="header-left">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageDescription">Resumen general del sistema de gestión vehicular</p>
+    </div>
+    <div class="header-right">
+        <div class="user-profile">
+            <div class="avatar">AD</div>
+            <div class="user-info">
+                <h4>Admin</h4>
+                <p>Administrador</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>Vehículos Activos</h3>
+                <div class="stat-value">12</div>
+            </div>
+            <div class="stat-icon blue">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>Mantenimientos Pendientes</h3>
+                <div class="stat-value">5</div>
+            </div>
+            <div class="stat-icon orange">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>Alertas Críticas</h3>
+                <div class="stat-value">3</div>
+            </div>
+            <div class="stat-icon red">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Mantenimientos Próximos</h2>
+                <p>Últimos mantenimientos programados</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Vehículo</th>
+                    <th>Tipo</th>
+                    <th>Fecha Programada</th>
+                    <th>KM Programado</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>ABC-123</td>
+                    <td>Cambio de Aceite</td>
+                    <td>2025-12-31</td>
+                    <td>50,000 km</td>
+                    <td><span class="status-badge pendiente">pendiente</span></td>
+                </tr>
+                <tr>
+                    <td>DEF-456</td>
+                    <td>Revisión General</td>
+                    <td>2025-11-20</td>
+                    <td>35,000 km</td>
+                    <td><span class="status-badge pendiente">pendiente</span></td>
+                </tr>
+                <tr>
+                    <td>XYZ-789</td>
+                    <td>Frenos</td>
+                    <td>2025-11-25</td>
+                    <td>40,000 km</td>
+                    <td><span class="status-badge en-progreso">en progreso</span></td>
+                </tr>
+                <tr>
+                    <td>LMN-555</td>
+                    <td>Motor</td>
+                    <td>2025-12-10</td>
+                    <td>60,000 km</td>
+                    <td><span class="status-badge completado">completado</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
