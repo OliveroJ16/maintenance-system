@@ -4,12 +4,16 @@
     box-sizing: border-box;
 }
 
+html.swal2-shown, body.swal2-shown {
+    overflow: auto !important;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background-color: #f5f5f7;
     display: flex;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow: auto;
 }
 
 .sidebar {

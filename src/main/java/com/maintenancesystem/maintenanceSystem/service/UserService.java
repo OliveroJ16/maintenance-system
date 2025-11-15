@@ -3,6 +3,7 @@ package com.maintenancesystem.maintenanceSystem.service;
 import com.maintenancesystem.maintenanceSystem.entity.User;
 import com.maintenancesystem.maintenanceSystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    final private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public List<User> getAllUser(){
         List<User> users = userRepository.findAll();
@@ -20,8 +22,20 @@ public class UserService {
     }
 
     public void saveUser(User user) {
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setRegistrationDate(LocalDateTime.now());
+        user.setPassword(hashedPassword);
         userRepository.save(user);
     }
+
+    public boolean deleteUser(Integer id) {
+        if (!userRepository.existsById(id)) {
+            return false;
+        }
+
+        userRepository.deleteById(id);
+        return true;
+    }
+
 
 }

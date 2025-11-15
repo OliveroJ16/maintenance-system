@@ -1,6 +1,4 @@
-// ========================================
-// CARGA DE SECCIONES
-// ========================================
+// Cargar secciones
 const contentArea = document.getElementById("contentArea");
 const menuItems = document.querySelectorAll(".menu-item");
 
@@ -31,65 +29,63 @@ menuItems.forEach(item => {
     });
 });
 
-// ========================================
-// FUNCIÓN MEJORADA PARA MOSTRAR MENSAJES
-// ========================================
-function mostrarMensaje(texto, esError = false, subtexto = null) {
-    // Crear overlay de fondo
-    const overlay = document.createElement("div");
-    overlay.className = "toast-overlay";
 
-    // Crear el elemento del mensaje
-    const toast = document.createElement("div");
-    toast.className = `toast-message ${esError ? "error" : "success"}`;
+//Eliminar usuario
+window.confirmDelete = function (id) {
+    Swal.fire({
+        title: "¿Eliminar usuario?",
+        text: "Esta acción no se puede revertir",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#e3342f",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
 
-    // Agregar icono según el tipo
-    const icon = esError
-        ? `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                   d="M6 18L18 6M6 6l12 12"/>
-           </svg>`
-        : `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                   d="M5 13l4 4L19 7"/>
-           </svg>`;
+            try {
+                
+                const response = await fetch(`/usuarios/delete/${id}`);
 
-    // Construir el HTML del toast
-    const subtextoHTML = subtexto ? `<div class="toast-subtext">${subtexto}</div>` : '';
+                if (response.ok) {
+                    Swal.fire({
+                        title: "¡Eliminado!",
+                        text: "El usuario fue eliminado correctamente",
+                        icon: "success",
+                        confirmButtonColor: "#6366f1",
+                    });
 
-    toast.innerHTML = `
-        <div class="toast-icon">${icon}</div>
-        <div class="toast-text">${texto}</div>
-        ${subtextoHTML}
-        <div class="toast-progress"></div>
-    `;
+                    setTimeout(() => {
+                        loadSection('usuarios');
+                    }, 500);
 
-    // Agregar toast al overlay
-    overlay.appendChild(toast);
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "No se pudo eliminar el usuario.",
+                        confirmButtonColor: "#6366f1",
+                    });
+                }
 
-    // Agregar al body
-    document.body.appendChild(overlay);
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No fue posible conectar con el servidor.",
+                    confirmButtonColor: "#6366f1"
+                });
+            }
 
-    // Hacer que desaparezca después de 3 segundos
-    setTimeout(() => {
-        overlay.classList.add("fade-out");
-        // Eliminar del DOM después de la animación
-        setTimeout(() => overlay.remove(), 300);
-    }, 3000);
-
-    // Cerrar al hacer clic en el overlay (opcional)
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            overlay.classList.add("fade-out");
-            setTimeout(() => overlay.remove(), 300);
         }
     });
 }
 
-// ========================================
-// USUARIOS
-// ========================================
-window.openUserModal = function() {
+
+//Modal para registro
+window.openUserModal = function () {
     const modal = document.getElementById('userModal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -102,12 +98,15 @@ window.openUserModal = function() {
     }
 }
 
-window.closeUserModal = function() {
+//Cerrar modal
+window.closeUserModal = function () {
     const modal = document.getElementById('userModal');
     if (modal) modal.classList.add('hidden');
 }
 
-window.editUser = function(id) {
+
+
+window.editUser = function (id) {
     openUserModal();
     setTimeout(() => {
         const title = document.getElementById('modalTitle');
@@ -115,13 +114,8 @@ window.editUser = function(id) {
     }, 10);
 }
 
-window.deleteUser = function(id) {
-    if (confirm('¿Está seguro de eliminar este usuario?')) {
-        alert('Usuario eliminado (funcionalidad pendiente)');
-    }
-}
-
-window.saveUser = async function(event) {
+//Guardar usuario
+window.saveUser = async function (event) {
     event.preventDefault();
 
     const form = document.getElementById('userForm');
@@ -134,18 +128,27 @@ window.saveUser = async function(event) {
         });
 
         if (response.ok) {
-            // Cerrar modal
             closeUserModal();
 
-            // Mostrar mensaje de éxito espectacular
-            mostrarMensaje("¡Usuario guardado!", false, "Los cambios se han aplicado correctamente");
+            Swal.fire({
+                title: "¡Usuario guardado!",
+                text: "El registro se completó correctamente",
+                icon: "success",
+                confirmButtonColor: "#6366f1",
+                draggable: true
+            });
 
-            // Recargar la sección de usuarios sin recargar toda la página
             setTimeout(() => {
                 loadSection('usuarios');
             }, 500);
+
         } else {
-            mostrarMensaje("Error al guardar", true, "No se pudo completar la operación");
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "No se pudo completar la operación.",
+                confirmButtonColor: "#6366f1",
+            });
         }
     } catch (error) {
         console.error('Error:', error);
@@ -153,7 +156,9 @@ window.saveUser = async function(event) {
     }
 };
 
-window.searchUsers = function(value) {
+
+//Buscar usuario
+window.searchUsers = function (value) {
     const filter = value.toLowerCase();
     const rows = document.querySelectorAll('#usersTable tbody tr');
 
@@ -163,10 +168,22 @@ window.searchUsers = function(value) {
     });
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 // ========================================
 // VEHÍCULOS
 // ========================================
-window.openVehicleModal = function() {
+window.openVehicleModal = function () {
     console.log('=== INICIANDO APERTURA DE MODAL DE VEHÍCULOS ===');
 
     const modal = document.getElementById('vehicleModal');
@@ -203,12 +220,12 @@ window.openVehicleModal = function() {
     console.log('=== FIN APERTURA MODAL ===');
 }
 
-window.closeVehicleModal = function() {
+window.closeVehicleModal = function () {
     const modal = document.getElementById('vehicleModal');
     if (modal) modal.classList.add('hidden');
 }
 
-window.editVehicle = function(id) {
+window.editVehicle = function (id) {
     openVehicleModal();
     setTimeout(() => {
         const title = document.getElementById('vehicleModalTitle');
@@ -216,19 +233,18 @@ window.editVehicle = function(id) {
     }, 10);
 }
 
-window.deleteVehicle = function(id) {
-    if (confirm('¿Está seguro de eliminar este vehículo?')) {
-        alert('Vehículo eliminado (funcionalidad pendiente)');
-    }
-}
+window.closeDeleteModal = function () {
+    document.getElementById('deleteModal').classList.add('hidden');
+};
 
-window.saveVehicle = function(event) {
+
+window.saveVehicle = function (event) {
     event.preventDefault();
     alert('Vehículo guardado (funcionalidad pendiente)');
     closeVehicleModal();
 }
 
-window.searchVehicles = function(value) {
+window.searchVehicles = function (value) {
     const filter = value.toLowerCase();
     const rows = document.querySelectorAll('#vehiclesTable tbody tr');
 
@@ -241,7 +257,7 @@ window.searchVehicles = function(value) {
 // ========================================
 // MANTENIMIENTOS
 // ========================================
-window.openMaintenanceModal = function() {
+window.openMaintenanceModal = function () {
     console.log('=== INICIANDO APERTURA DE MODAL DE MANTENIMIENTOS ===');
 
     const modal = document.getElementById('maintenanceModal');
@@ -278,12 +294,12 @@ window.openMaintenanceModal = function() {
     console.log('=== FIN APERTURA MODAL ===');
 }
 
-window.closeMaintenanceModal = function() {
+window.closeMaintenanceModal = function () {
     const modal = document.getElementById('maintenanceModal');
     if (modal) modal.classList.add('hidden');
 }
 
-window.editMaintenance = function(id) {
+window.editMaintenance = function (id) {
     openMaintenanceModal();
     setTimeout(() => {
         const title = document.getElementById('maintenanceModalTitle');
@@ -291,19 +307,19 @@ window.editMaintenance = function(id) {
     }, 10);
 }
 
-window.deleteMaintenance = function(id) {
+window.deleteMaintenance = function (id) {
     if (confirm('¿Está seguro de eliminar este mantenimiento?')) {
         alert('Mantenimiento eliminado (funcionalidad pendiente)');
     }
 }
 
-window.saveMaintenance = function(event) {
+window.saveMaintenance = function (event) {
     event.preventDefault();
     alert('Mantenimiento guardado (funcionalidad pendiente)');
     closeMaintenanceModal();
 }
 
-window.searchMaintenance = function(value) {
+window.searchMaintenance = function (value) {
     const filter = value.toLowerCase();
     const rows = document.querySelectorAll('#maintenanceTable tbody tr');
 
@@ -316,7 +332,7 @@ window.searchMaintenance = function(value) {
 // ========================================
 // TALLERES
 // ========================================
-window.openWorkshopModal = function() {
+window.openWorkshopModal = function () {
     const modal = document.getElementById('workshopModal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -329,12 +345,12 @@ window.openWorkshopModal = function() {
     }
 }
 
-window.closeWorkshopModal = function() {
+window.closeWorkshopModal = function () {
     const modal = document.getElementById('workshopModal');
     if (modal) modal.classList.add('hidden');
 }
 
-window.editWorkshop = function(id) {
+window.editWorkshop = function (id) {
     openWorkshopModal();
     setTimeout(() => {
         const title = document.getElementById('modalTitle');
@@ -342,19 +358,19 @@ window.editWorkshop = function(id) {
     }, 10);
 }
 
-window.deleteWorkshop = function(id) {
+window.deleteWorkshop = function (id) {
     if (confirm('¿Está seguro de eliminar este taller?')) {
         alert('Taller eliminado (funcionalidad pendiente)');
     }
 }
 
-window.saveWorkshop = function(event) {
+window.saveWorkshop = function (event) {
     event.preventDefault();
     alert('Taller guardado (funcionalidad pendiente)');
     closeWorkshopModal();
 }
 
-window.searchWorkshops = function(value) {
+window.searchWorkshops = function (value) {
     const filter = value.toLowerCase();
     const rows = document.querySelectorAll('#workshopsTable tbody tr');
 
@@ -367,7 +383,7 @@ window.searchWorkshops = function(value) {
 // ========================================
 // ALERTAS
 // ========================================
-window.markAlertRead = function(id) {
+window.markAlertRead = function (id) {
     if (confirm('¿Marcar esta alerta como atendida?')) {
         alert('Alerta marcada como atendida (funcionalidad pendiente)');
     }
@@ -376,7 +392,7 @@ window.markAlertRead = function(id) {
 // ========================================
 // CHOFERES
 // ========================================
-window.openDriverModal = function() {
+window.openDriverModal = function () {
     const modal = document.getElementById('driverModal');
     if (modal) {
         modal.classList.remove('hidden');
@@ -389,12 +405,12 @@ window.openDriverModal = function() {
     }
 }
 
-window.closeDriverModal = function() {
+window.closeDriverModal = function () {
     const modal = document.getElementById('driverModal');
     if (modal) modal.classList.add('hidden');
 }
 
-window.editDriver = function(id) {
+window.editDriver = function (id) {
     openDriverModal();
     setTimeout(() => {
         const title = document.getElementById('modalTitle');
@@ -402,19 +418,19 @@ window.editDriver = function(id) {
     }, 10);
 }
 
-window.deleteDriver = function(id) {
+window.deleteDriver = function (id) {
     if (confirm('¿Está seguro de eliminar este chofer?')) {
         alert('Chofer eliminado (funcionalidad pendiente)');
     }
 }
 
-window.saveDriver = function(event) {
+window.saveDriver = function (event) {
     event.preventDefault();
     alert('Chofer guardado (funcionalidad pendiente)');
     closeDriverModal();
 }
 
-window.searchDrivers = function(value) {
+window.searchDrivers = function (value) {
     const filter = value.toLowerCase();
     const rows = document.querySelectorAll('#driversTable tbody tr');
 
@@ -427,7 +443,7 @@ window.searchDrivers = function(value) {
 // ========================================
 // CERRAR MODAL AL HACER CLIC FUERA
 // ========================================
-window.addEventListener("click", function(event) {
+window.addEventListener("click", function (event) {
     const modals = [
         'userModal',
         'vehicleModal',

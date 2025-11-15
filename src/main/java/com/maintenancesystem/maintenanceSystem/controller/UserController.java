@@ -29,4 +29,19 @@ public class UserController {
         userService.saveUser(user);
         return "OK";
     }
+
+    @GetMapping("/usuarios/delete/{id}")
+    public String deleteUser(@PathVariable Integer id, Model model) {
+        boolean deleted = userService.deleteUser(id);
+        if (!deleted) {
+            model.addAttribute("error", "El usuario no existe");
+        } else {
+            model.addAttribute("mensaje", "Usuario eliminado correctamente");
+        }
+        model.addAttribute("usuarios", userService.getAllUser());
+        model.addAttribute("nuevoUsuario", new User());
+
+        return "usuarios";
+    }
 }
+
