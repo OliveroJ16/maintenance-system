@@ -1,0 +1,241 @@
+<div class="header">
+    <div class="header-left">
+        <h1 id="pageTitle">Choferes</h1>
+        <p id="pageDescription">Gestión de choferes del sistema</p>
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Gestión de Choferes</h2>
+                <p>Consultar, registrar y administrar choferes</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="openDriverModal()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 4v16m8-8H4" />
+                </svg>
+                Nuevo Chofer
+            </button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar chofer..." onkeyup="searchDrivers(this.value)">
+        </div>
+
+        <div class="table-container">
+            <table id="driversTable">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Cédula</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Licencia</th>
+                    <th>Expiración Licencia</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="d : ${choferes}">
+                    <td th:text="${d.firstName}">Carlos</td>
+                    <td th:text="${d.lastName}">González</td>
+                    <td th:text="${d.idCard}">8-123-456</td>
+                    <td th:text="${d.phone}">6123-4567</td>
+                    <td th:text="${d.email}">carlos@mail.com</td>
+
+                    <td th:text="${d.licenseCategory}">Tipo D</td>
+
+                    <td th:text="${#temporals.format(d.licenseExpirationDate, 'dd/MM/yyyy')}">
+                        01/01/2026
+                    </td>
+
+                    <td th:text="${d.status}">ACTIVO</td>
+
+                    <td>
+                        <div class="action-buttons">
+
+                            <!-- BOTÓN EDITAR -->
+                            <button class="icon-btn edit"
+                                    onclick="editDriver(this)"
+                                    th:data-id="${d.idDriver}"
+                                    th:data-firstname="${d.firstName}"
+                                    th:data-lastname="${d.lastName}"
+                                    th:data-idcard="${d.idCard}"
+                                    th:data-phone="${d.phone}"
+                                    th:data-email="${d.email}"
+                                    th:data-license="${d.licenseCategory}"
+                                    th:data-expdate="${d.licenseExpirationDate}"
+                                    th:data-status="${d.status}">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5
+                                             m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828
+                                             l8.586-8.586z" />
+                                </svg>
+                            </button>
+
+                            <!-- BOTÓN ELIMINAR -->
+                            <button class="icon-btn delete"
+                                    th:onclick="'confirmDeleteDriver(' + ${d.idDriver} + ')'">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                                             a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4
+                                             a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="driverModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="driverModalTitle">Nuevo Chofer</h3>
+            <button class="close-btn" onclick="closeDriverModal()">&times;</button>
+        </div>
+
+        <form id="driverForm" th:action="@{/choferes}" th:object="${nuevoChofer}" method="post"
+              onsubmit="saveDriver(event)">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" th:field="*{firstName}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" th:field="*{lastName}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cédula</label>
+                    <input type="text" th:field="*{idCard}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" th:field="*{phone}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" th:field="*{email}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Licencia</label>
+                    <select th:field="*{licenseCategory}">
+                        <option th:each="c : ${T(com.maintenancesystem.maintenanceSystem.enums.LicenseCategory).values()}"
+                                th:value="${c}" th:text="${c}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha Expiración</label>
+                    <input type="date" th:field="*{licenseExpirationDate}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select th:field="*{status}">
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDriverModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="editDriverModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Editar Chofer</h3>
+            <button class="close-btn" onclick="closeEditDriverModal()">&times;</button>
+        </div>
+
+        <form id="editDriverForm" onsubmit="updateDriver(event)">
+            <input type="hidden" name="idDriver">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="firstName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" name="lastName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cédula</label>
+                    <input type="text" name="idCard" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Licencia</label>
+                    <select name="licenseCategory">
+                        <option th:each="c : ${T(com.maintenancesystem.maintenanceSystem.enums.LicenseCategory).values()}"
+                                th:value="${c}" th:text="${c}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Expiración Licencia</label>
+                    <input type="date" name="licenseExpirationDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="status">
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEditDriverModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+            </div>
+        </form>
+    </div>
+</div>
