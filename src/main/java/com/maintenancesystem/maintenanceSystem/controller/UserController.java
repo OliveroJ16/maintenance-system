@@ -24,10 +24,9 @@ public class UserController {
     }
 
     @PostMapping("/usuarios")
-    @ResponseBody
     public String saveUser(@ModelAttribute("nuevoUsuario") User user) {
         userService.saveUser(user);
-        return "OK";
+        return "usuarios";
     }
 
     @GetMapping("/usuarios/delete/{id}")
@@ -43,5 +42,25 @@ public class UserController {
 
         return "usuarios";
     }
+
+    @PostMapping("/usuarios/update/{id}")
+    public String updateUser(@PathVariable Integer id,
+                             @ModelAttribute("usuarioEditado") User data,
+                             Model model) {
+
+        boolean updated = userService.updateUser(id, data);
+
+        if (!updated) {
+            model.addAttribute("error", "No se pudo actualizar el usuario");
+        } else {
+            model.addAttribute("mensaje", "Usuario actualizado correctamente");
+        }
+
+        model.addAttribute("usuarios", userService.getAllUser());
+        model.addAttribute("nuevoUsuario", new User());
+
+        return "usuarios";
+    }
+
 }
 

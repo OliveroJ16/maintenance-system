@@ -98,21 +98,103 @@ window.openUserModal = function () {
     }
 }
 
-//Cerrar modal
+//Cerrar modal de registro
 window.closeUserModal = function () {
     const modal = document.getElementById('userModal');
     if (modal) modal.classList.add('hidden');
 }
 
+// Función para editar usuario (lee datos desde data-attributes)
+window.editUser = function(button) {
+    const userData = {
+        idUser: button.getAttribute('data-id'),
+        username: button.getAttribute('data-username'),
+        firstName: button.getAttribute('data-firstname'),
+        lastName: button.getAttribute('data-lastname'),
+        role: button.getAttribute('data-role'),
+        email: button.getAttribute('data-email'),
+        driver: button.getAttribute('data-driver')
+    };
 
-
-window.editUser = function (id) {
-    openUserModal();
-    setTimeout(() => {
-        const title = document.getElementById('modalTitle');
-        if (title) title.textContent = 'Editar Usuario';
-    }, 10);
+    openEditUserModal(userData);
 }
+
+//Modal para edición
+window.openEditUserModal = function(userData) {
+    const modal = document.getElementById('editUserModal');
+    if (!modal) {
+        console.error('Modal de edición no encontrado');
+        return;
+    }
+
+    modal.classList.remove('hidden');
+
+    // Rellenar el formulario con los datos del usuario
+    const form = document.getElementById('editUserForm');
+    if (form) {
+        form.querySelector('input[name="idUser"]').value = userData.idUser;
+        form.querySelector('input[name="username"]').value = userData.username;
+        form.querySelector('input[name="firstName"]').value = userData.firstName;
+        form.querySelector('input[name="lastName"]').value = userData.lastName;
+        form.querySelector('select[name="role"]').value = userData.role;
+        form.querySelector('input[name="email"]').value = userData.email;
+        form.querySelector('input[name="driver"]').value = userData.driver || '';
+    }
+}
+
+//Cerrar modal de edición
+window.closeEditUserModal = function() {
+    const modal = document.getElementById('editUserModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+//Actualizar usuario
+window.updateUser = async function (event) {
+    event.preventDefault();
+
+    const form = document.getElementById('editUserForm');
+    const formData = new FormData(form);
+    const userId = formData.get('idUser');
+
+    try {
+        const response = await fetch(`/usuarios/update/${userId}`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            closeEditUserModal();
+
+            Swal.fire({
+                title: "Actualizado",
+                text: "El usuario fue actualizado correctamente",
+                icon: "success",
+                confirmButtonColor: "#6366f1"
+            });
+
+            setTimeout(() => loadSection('usuarios'), 500);
+
+        } else {
+            Swal.fire({
+                title: "Error",
+                text: "No se pudo actualizar el usuario",
+                icon: "error",
+                confirmButtonColor: "#6366f1"
+            });
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+
+        Swal.fire({
+            title: "Error de conexión",
+            text: "No se pudo conectar con el servidor",
+            icon: "error",
+            confirmButtonColor: "#6366f1"
+        });
+    }
+};
+
 
 //Guardar usuario
 window.saveUser = async function (event) {
@@ -152,10 +234,14 @@ window.saveUser = async function (event) {
         }
     } catch (error) {
         console.error('Error:', error);
-        mostrarMensaje("Error de conexión", true, "No se pudo conectar con el servidor");
+        Swal.fire({
+            icon: "error",
+            title: "Error de conexión",
+            text: "No se pudo conectar con el servidor",
+            confirmButtonColor: "#6366f1"
+        });
     }
 };
-
 
 //Buscar usuario
 window.searchUsers = function (value) {
@@ -167,7 +253,6 @@ window.searchUsers = function (value) {
         row.style.display = text.includes(filter) ? '' : 'none';
     });
 }
-
 
 
 

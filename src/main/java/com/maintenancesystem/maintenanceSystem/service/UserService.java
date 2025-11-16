@@ -37,5 +37,15 @@ public class UserService {
         return true;
     }
 
+    public boolean updateUser(Integer id, User dto) {
+        int rows = userRepository.updatePartial(
+                id,
+                dto.getFirstName(),
+                dto.getLastName(),
+                dto.getEmail(),
+                dto.getRole()
+        );
+        return rows > 0;
+    }
 
 }

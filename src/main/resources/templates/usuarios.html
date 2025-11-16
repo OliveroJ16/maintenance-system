@@ -36,58 +36,63 @@
         <div class="table-container">
             <table id="usersTable">
                 <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>Rol</th>
-                        <th>Email</th>
-                        <th>Chofer</th>
-                        <th>Fecha Registro</th>
-                        <th>Acciones</th>
-                    </tr>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Rol</th>
+                    <th>Email</th>
+                    <th>Chofer</th>
+                    <th>Fecha Registro</th>
+                    <th>Acciones</th>
+                </tr>
                 </thead>
                 <tbody>
-                    <!-- Itera sobre la lista 'usuarios' del modelo -->
-                    <tr th:each="u : ${usuarios}">
-                        <td th:text="${u.username}">admin</td>
-                        <td th:text="${u.firstName}">Juan</td>
-                        <td th:text="${u.lastName}">Pérez</td>
-                        <td th:text="${u.role}">administrador</td>
-                        <td th:text="${u.email}">juan@example.com</td>
-                        <td th:text="${u.driver != null ? u.driver.nombre : '—'}">Sin chofer</td>
-                        <td th:text="${#temporals.format(u.registrationDate, 'dd/MM/yyyy HH:mm')}">2025-11-12 10:00</td>
-                        <td>
-                            <div class="action-buttons">
+                <!-- Itera sobre la lista 'usuarios' del modelo -->
+                <tr th:each="u : ${usuarios}">
+                    <td th:text="${u.username}">admin</td>
+                    <td th:text="${u.firstName}">Juan</td>
+                    <td th:text="${u.lastName}">Pérez</td>
+                    <td th:text="${u.role}">administrador</td>
+                    <td th:text="${u.email}">juan@example.com</td>
+                    <td th:text="${u.driver != null ? u.driver.nombre : '—'}">Sin chofer</td>
+                    <td th:text="${#temporals.format(u.registrationDate, 'dd/MM/yyyy HH:mm')}">2025-11-12 10:00</td>
+                    <td>
+                        <div class="action-buttons">
 
-                                <!-- Botón Editar -->
-                                <button class="icon-btn edit" th:onclick="'editUser(' + ${u.idUser} + ')'">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414
-                          a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </button>
+                            <!-- DESPUÉS (CORRECTO) -->
+                            <button class="icon-btn edit" onclick="editUser(this)"
+                                    th:data-id="${u.idUser}"
+                                    th:data-username="${u.username}"
+                                    th:data-firstname="${u.firstName}"
+                                    th:data-lastname="${u.lastName}"
+                                    th:data-role="${u.role}"
+                                    th:data-email="${u.email}"
+                                    th:data-driver="${u.driver != null ? u.driver.nombre : ''}">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414
+              a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
 
-                                <button class="icon-btn delete" th:onclick="'confirmDelete(' + ${u.idUser} + ')'">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                            <button class="icon-btn delete" th:onclick="'confirmDelete(' + ${u.idUser} + ')'">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
                  a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4
                  a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-
-
-                            </div>
-                        </td>
-
-                    </tr>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- Modal para agregar/editar usuario -->
+<!-- Modal para agregar usuario -->
 <div id="userModal" class="modal hidden">
     <div class="modal-content">
         <div class="modal-header">
@@ -97,7 +102,7 @@
 
         <!-- FORMULARIO DE REGISTRO DE USUARIO -->
         <form id="userForm" th:action="@{/usuarios}" th:object="${nuevoUsuario}" method="post"
-            onsubmit="saveUser(event)">
+              onsubmit="saveUser(event)">
             <div class="form-grid">
                 <div class="form-group">
                     <label>Nombre de Usuario</label>
@@ -136,6 +141,56 @@
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div> <!-- ✅ ESTE CIERRE FALTABA -->
+
+<!-- Modal para EDITAR usuario -->
+<div id="editUserModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Editar Usuario</h3>
+            <button class="close-btn" onclick="closeEditUserModal()">&times;</button>
+        </div>
+
+        <form id="editUserForm" onsubmit="updateUser(event)">
+            <input type="hidden" name="idUser">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre de Usuario</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label>Rol</label>
+                    <select name="role" required>
+                        <option value="">Seleccionar rol</option>
+                        <option value="ADMINISTRADOR">Administrador</option>
+                        <option value="SUPERVISOR">Supervisor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Chofer Asignado</label>
+                    <input type="text" name="driver" placeholder="Opcional">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Actualizar</button>
             </div>
         </form>
     </div>
