@@ -40,7 +40,7 @@ public class UserService {
         return true;
     }
 
-    public boolean updateUser(Integer id, User user) {
+    public void updateUser(Integer id, User user) {
         user.setFirstName(stringNormalizer.toTitleCase(user.getFirstName()));
         user.setLastName(stringNormalizer.toTitleCase(user.getLastName()));
         int rows = userRepository.updatePartial(
@@ -50,7 +50,6 @@ public class UserService {
                 user.getEmail(),
                 user.getRole()
         );
-        return rows > 0;
     }
 
 }

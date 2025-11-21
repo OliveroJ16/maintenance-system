@@ -39,8 +39,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <!-- Itera sobre la lista 'usuarios' del modelo -->
-                <tr th:each="u : ${usuarios}">
+                <tr th:each="u : ${users}">
                     <td th:text="${u.username}">admin</td>
                     <td th:text="${u.firstName}">Juan</td>
                     <td th:text="${u.lastName}">Pérez</td>
@@ -50,8 +49,6 @@
                     <td th:text="${#temporals.format(u.registrationDate, 'dd/MM/yyyy HH:mm')}">2025-11-12 10:00</td>
                     <td>
                         <div class="action-buttons">
-
-                            <!-- DESPUÉS (CORRECTO) -->
                             <button class="icon-btn edit" onclick="editUser(this)"
                                     th:data-id="${u.idUser}"
                                     th:data-username="${u.username}"
@@ -92,7 +89,7 @@
         </div>
 
         <!-- FORMULARIO DE REGISTRO DE USUARIO -->
-        <form id="userForm" th:action="@{/usuarios}" th:object="${nuevoUsuario}" method="post"
+        <form id="userForm" th:action="@{/users}" th:object="${newUser}" method="post"
               onsubmit="saveUser(event)">
             <div class="form-grid">
                 <div class="form-group">
@@ -135,7 +132,7 @@
             </div>
         </form>
     </div>
-</div> <!-- ✅ ESTE CIERRE FALTABA -->
+</div>
 
 <!-- Modal para EDITAR usuario -->
 <div id="editUserModal" class="modal hidden">

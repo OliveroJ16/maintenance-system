@@ -11,55 +11,45 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/usuarios")
+    @GetMapping
     public String users(Model model) {
         List<User> users = userService.getAllUser();
-        model.addAttribute("usuarios", users);
-        model.addAttribute("nuevoUsuario", new User());
-        return "usuarios";
+        model.addAttribute("users", users);
+        model.addAttribute("newUser", new User());
+        return "users";
     }
 
-    @PostMapping("/usuarios")
-    public String saveUser(@ModelAttribute("nuevoUsuario") User user) {
+    @PostMapping
+    public String saveUser(@ModelAttribute("newUser") User user) {
         userService.saveUser(user);
-        return "usuarios";
+        return "users";
     }
 
-    @GetMapping("/usuarios/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String deleteUser(@PathVariable Integer id, Model model) {
         boolean deleted = userService.deleteUser(id);
-        if (!deleted) {
-            model.addAttribute("error", "El usuario no existe");
-        } else {
-            model.addAttribute("mensaje", "Usuario eliminado correctamente");
-        }
-        model.addAttribute("usuarios", userService.getAllUser());
-        model.addAttribute("nuevoUsuario", new User());
+        model.addAttribute("users", userService.getAllUser());
+        model.addAttribute("newUser", new User());
 
-        return "usuarios";
+        return "users";
     }
 
-    @PostMapping("/usuarios/update/{id}")
+    @PostMapping("/update/{id}")
     public String updateUser(@PathVariable Integer id,
-                             @ModelAttribute("usuarioEditado") User data,
+                             @ModelAttribute("userEdit") User data,
                              Model model) {
 
-        boolean updated = userService.updateUser(id, data);
+        userService.updateUser(id, data);
 
-        if (!updated) {
-            model.addAttribute("error", "No se pudo actualizar el usuario");
-        } else {
-            model.addAttribute("mensaje", "Usuario actualizado correctamente");
-        }
+        model.addAttribute("users", userService.getAllUser());
+        model.addAttribute("newUser", new User());
 
-        model.addAttribute("usuarios", userService.getAllUser());
-        model.addAttribute("nuevoUsuario", new User());
-
-        return "usuarios";
+        return "users";
     }
 
 }

@@ -13,7 +13,7 @@ window.confirmDelete = function (id) {
 
             try {
                 
-                const response = await fetch(`/usuarios/delete/${id}`);
+                const response = await fetch(`/users/delete/${id}`);
 
                 if (response.ok) {
                     Swal.fire({
@@ -24,7 +24,7 @@ window.confirmDelete = function (id) {
                     });
 
                     setTimeout(() => {
-                        loadSection('usuarios');
+                        loadSection('users');
                     }, 500);
 
                 } else {
@@ -124,7 +124,7 @@ window.updateUser = async function (event) {
     const userId = formData.get('idUser');
 
     try {
-        const response = await fetch(`/usuarios/update/${userId}`, {
+        const response = await fetch(`/users/update/${userId}`, {
             method: 'POST',
             body: formData
         });
@@ -139,7 +139,7 @@ window.updateUser = async function (event) {
                 confirmButtonColor: "#6366f1"
             });
 
-            setTimeout(() => loadSection('usuarios'), 500);
+            setTimeout(() => loadSection('users'), 500);
 
         } else {
             Swal.fire({
@@ -171,7 +171,7 @@ window.saveUser = async function (event) {
     const formData = new FormData(form);
 
     try {
-        const response = await fetch('/usuarios', {
+        const response = await fetch('/users', {
             method: 'POST',
             body: formData
         });
@@ -188,7 +188,7 @@ window.saveUser = async function (event) {
             });
 
             setTimeout(() => {
-                loadSection('usuarios');
+                loadSection('users');
             }, 500);
 
         } else {
