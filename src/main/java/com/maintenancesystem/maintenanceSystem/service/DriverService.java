@@ -3,6 +3,7 @@ package com.maintenancesystem.maintenanceSystem.service;
 import com.maintenancesystem.maintenanceSystem.entity.Driver;
 import com.maintenancesystem.maintenanceSystem.entity.User;
 import com.maintenancesystem.maintenanceSystem.repository.DriverRepository;
+import com.maintenancesystem.maintenanceSystem.utils.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,15 @@ import java.util.List;
 public class DriverService {
 
     private final DriverRepository driverRepository;
+    private final StringNormalizer stringNormalizer;
 
     public List<Driver> getAllDriver(){
-        List<Driver> drivers = driverRepository.findAll();
-        return drivers;
+        return driverRepository.findAll();
     }
 
     public void saveDriver(Driver driver){
+        driver.setFirstName(stringNormalizer.toTitleCase(driver.getFirstName()));
+        driver.setLastName(stringNormalizer.toTitleCase(driver.getLastName()));
         driverRepository.save(driver);
     }
 
@@ -32,17 +35,19 @@ public class DriverService {
         return true;
     }
 
-    public boolean updateDriver(Integer id, Driver dto) {
+    public boolean updateDriver(Integer id, Driver driver) {
+        driver.setFirstName(stringNormalizer.toTitleCase(driver.getFirstName()));
+        driver.setLastName(stringNormalizer.toTitleCase(driver.getLastName()));
         int rows = driverRepository.updatePartial(
                 id,
-                dto.getFirstName(),
-                dto.getLastName(),
-                dto.getIdCard(),
-                dto.getPhone(),
-                dto.getEmail(),
-                dto.getLicenseCategory(),
-                dto.getLicenseExpirationDate(),
-                dto.getStatus()
+                driver.getFirstName(),
+                driver.getLastName(),
+                driver.getIdCard(),
+                driver.getPhone(),
+                driver.getEmail(),
+                driver.getLicenseCategory(),
+                driver.getLicenseExpirationDate(),
+                driver.getStatus()
         );
 
         return rows > 0;

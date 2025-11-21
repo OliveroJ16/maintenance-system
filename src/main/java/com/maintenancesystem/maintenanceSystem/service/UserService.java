@@ -2,6 +2,7 @@ package com.maintenancesystem.maintenanceSystem.service;
 
 import com.maintenancesystem.maintenanceSystem.entity.User;
 import com.maintenancesystem.maintenanceSystem.repository.UserRepository;
+import com.maintenancesystem.maintenanceSystem.utils.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,14 +16,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final StringNormalizer stringNormalizer;
 
     public List<User> getAllUser(){
-        List<User> users = userRepository.findAll();
-        return users;
+        return userRepository.findAll();
     }
 
     public void saveUser(User user) {
         String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setFirstName(stringNormalizer.toTitleCase(user.getFirstName()));
+        user.setLastName(stringNormalizer.toTitleCase(user.getLastName()));
         user.setRegistrationDate(LocalDateTime.now());
         user.setPassword(hashedPassword);
         userRepository.save(user);
@@ -37,13 +40,15 @@ public class UserService {
         return true;
     }
 
-    public boolean updateUser(Integer id, User dto) {
+    public boolean updateUser(Integer id, User user) {
+        user.setFirstName(stringNormalizer.toTitleCase(user.getFirstName()));
+        user.setLastName(stringNormalizer.toTitleCase(user.getLastName()));
         int rows = userRepository.updatePartial(
                 id,
-                dto.getFirstName(),
-                dto.getLastName(),
-                dto.getEmail(),
-                dto.getRole()
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole()
         );
         return rows > 0;
     }
