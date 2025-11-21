@@ -10,9 +10,6 @@ async function loadSection(section) {
 
         setTimeout(() => {
             const pageTitle = document.getElementById("pageTitle");
-            if (pageTitle) {
-                pageTitle.textContent = section.charAt(0).toUpperCase() + section.slice(1);
-            }
         }, 0);
     } catch (error) {
         contentArea.innerHTML = "<p>Error al cargar la sección.</p>";
