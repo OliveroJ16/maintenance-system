@@ -1,0 +1,278 @@
+<div class="header">
+    <div class="header-left">
+        <h1 id="pageTitle">Talleres</h1>
+        <p id="pageDescription">Gestión de talleres y sus servicios</p>
+    </div>
+</div>
+
+<div class="content-area">
+
+    <!-- 🔵 PESTAÑAS -->
+    <div style="display:flex; gap:12px; margin-bottom:24px;">
+        <button class="btn tab-btn btn-primary" onclick="switchTab('tab-talleres')" id="tabBtn-talleres">
+            Talleres
+        </button>
+
+        <button class="btn tab-btn btn-secondary" onclick="switchTab('tab-servicios')" id="tabBtn-servicios">
+            Servicios del Taller
+        </button>
+    </div>
+
+
+    <div id="tab-talleres" class="section-card">
+
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Gestión de Talleres</h2>
+                <p>Registrar, actualizar y administrar talleres</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="openWorkshopModal()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Nuevo Taller
+            </button>
+        </div>
+
+        <!-- Buscador -->
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar taller..." onkeyup="searchWorkshops(this.value)">
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-container">
+            <table id="workshopsTable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Especialidad</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="t : ${workshops}">
+                        <td th:text="${t.workshopName}"></td>
+                        <td th:text="${t.address}">—</td>
+                        <td th:text="${t.phone}"></td>
+                        <td th:text="${t.email}">—</td>
+                        <td th:text="${t.specialty}">—</td>
+                        <td>
+                            <span class="status-badge" th:classappend="${t.status == 'ACTIVO'} ? 'activo' : 'inactivo'"
+                                th:text="${t.status}">
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="action-buttons">
+                                <button class="icon-btn edit" th:attr="
+                                    data-id=${t.idWorkshop},
+                                    data-name=${t.workshopName},
+                                    data-address=${t.address},
+                                    data-phone=${t.phone},
+                                    data-email=${t.email},
+                                    data-specialty=${t.specialty},
+                                    data-status=${t.status}
+                                " onclick="editWorkshop(this)">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414
+              a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+
+
+                                <button class="icon-btn delete"
+                                    th:onclick="'confirmDeleteWorkshop(' + ${t.idWorkshop} + ')'">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                                        a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4
+                                        a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+    </div> <!-- END TAB 1 -->
+
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- 🔵 TAB 2: SERVICIOS DEL TALLER -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <div id="tab-servicios" class="section-card" style="display:none;">
+
+        <div class="section-header">
+            <div class="section-title">
+                <h2 id="serviceWorkshopName">Servicios del Taller</h2>
+                <p id="serviceWorkshopDetails">Listado de servicios del taller seleccionado</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="openServiceModal()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Nuevo Servicio
+            </button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar servicio..." onkeyup="searchServices(this.value)">
+        </div>
+
+        <!-- TABLA DE SERVICIOS -->
+        <div class="table-container">
+            <table id="servicesTable">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Descripción</th>
+                        <th>Costo</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody id="servicesBody">
+                    <!-- Se llena dinámicamente -->
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Modal para agregar taller -->
+<div id="workshopModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitleWorkshop">Nuevo Taller</h3>
+            <button class="close-btn" onclick="closeWorkshopModal()">&times;</button>
+        </div>
+
+        <!-- FORMULARIO DE REGISTRO DE TALLER -->
+        <form id="workshopForm" th:action="@{/workshops}" th:object="${newWorkshop}" method="post"
+            onsubmit="saveWorkshop(event)">
+
+            <div class="form-grid">
+
+                <!-- workshopName -->
+                <div class="form-group">
+                    <label>Nombre del Taller</label>
+                    <input type="text" th:field="*{workshopName}" required>
+                </div>
+
+                <!-- address -->
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" th:field="*{address}">
+                </div>
+
+                <!-- phone -->
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" th:field="*{phone}" required>
+                </div>
+
+                <!-- email -->
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" th:field="*{email}">
+                </div>
+
+                <!-- specialty -->
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <input type="text" th:field="*{specialty}">
+                </div>
+
+                <!-- status -->
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select th:field="*{status}" required>
+                        <option value="">Seleccionar estado</option>
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeWorkshopModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDITAR TALLER -->
+<div id="editWorkshopModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Editar Taller</h3>
+            <button class="close-btn" onclick="closeEditWorkshopModal()">&times;</button>
+        </div>
+
+        <form id="editWorkshopForm" onsubmit="updateWorkshop(event)">
+            <input type="hidden" name="idWorkshop">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre del Taller</label>
+                    <input type="text" name="workshopName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" name="address">
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+
+                <div class="form-group">
+                    <label>Especialidad</label>
+                    <input type="text" name="specialty">
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select name="status" required>
+                        <option value="">Seleccionar estado</option>
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEditWorkshopModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+            </div>
+        </form>
+    </div>
+</div>

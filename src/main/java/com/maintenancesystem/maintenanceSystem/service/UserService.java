@@ -43,7 +43,7 @@ public class UserService {
     public void updateUser(Integer id, User user) {
         user.setFirstName(stringNormalizer.toTitleCase(user.getFirstName()));
         user.setLastName(stringNormalizer.toTitleCase(user.getLastName()));
-        int rows = userRepository.updatePartial(
+        userRepository.updatePartial(
                 id,
                 user.getFirstName(),
                 user.getLastName(),

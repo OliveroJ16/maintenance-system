@@ -28,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
         u.role = COALESCE(:role, u.role)
     WHERE u.idUser = :idUser
 """)
-    int updatePartial(
+    void updatePartial(
             @Param("idUser") Integer idUser,
             @Param("firstName") String firstName,
             @Param("lastName") String lastName,
