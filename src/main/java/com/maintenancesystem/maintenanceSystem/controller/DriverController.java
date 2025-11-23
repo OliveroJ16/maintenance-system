@@ -11,74 +11,41 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/drivers")
 public class DriverController {
 
     private final DriverService driverService;
 
-    // =============================================================
-    // LISTAR CHOFERES
-    // =============================================================
-    @GetMapping("/choferes")
+    @GetMapping
     public String drivers(Model model) {
         List<Driver> drivers = driverService.getAllDriver();
 
-        model.addAttribute("choferes", drivers);
-        model.addAttribute("nuevoChofer", new Driver());
+        model.addAttribute("drivers", drivers);
+        model.addAttribute("newDriver", new Driver());
 
-        return "choferes";
+        return "drivers";
     }
 
-    // =============================================================
-    // GUARDAR NUEVO CHOFER
-    // =============================================================
-    @PostMapping("/choferes")
-    public String saveDriver(@ModelAttribute("nuevoChofer") Driver driver) {
-
+    @PostMapping
+    public String saveDriver(@ModelAttribute("newDriver") Driver driver) {
         driverService.saveDriver(driver);
-
-        return "choferes";
+        return "drivers";
     }
 
-    // =============================================================
-    // ELIMINAR CHOFER
-    // =============================================================
-    @GetMapping("/choferes/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String deleteDriver(@PathVariable Integer id, Model model) {
-
-        boolean deleted = driverService.deleteDriver(id);
-
-        if (!deleted) {
-            model.addAttribute("error", "El chofer no existe");
-        } else {
-            model.addAttribute("mensaje", "Chofer eliminado correctamente");
-        }
-
-        model.addAttribute("choferes", driverService.getAllDriver());
-        model.addAttribute("nuevoChofer", new Driver());
-
-        return "choferes";
+        driverService.deleteDriver(id);
+        model.addAttribute("drivers", driverService.getAllDriver());
+        model.addAttribute("newDriver", new Driver());
+        return "drivers";
     }
 
-    // =============================================================
-    // ACTUALIZAR CHOFER (ACTUALIZACIÓN PARCIAL)
-    // =============================================================
-    @PostMapping("/choferes/update/{id}")
-    public String updateDriver(@PathVariable Integer id,
-                               @ModelAttribute("choferEditado") Driver data,
-                               Model model) {
-
-        boolean updated = driverService.updateDriver(id, data);
-
-        if (!updated) {
-            model.addAttribute("error", "No se pudo actualizar el chofer");
-        } else {
-            model.addAttribute("mensaje", "Chofer actualizado correctamente");
-        }
-
-        model.addAttribute("choferes", driverService.getAllDriver());
-        model.addAttribute("nuevoChofer", new Driver());
-
-        return "choferes";
+    @PostMapping("/update/{id}")
+    public String updateDriver(@PathVariable Integer id, @ModelAttribute("editDriver") Driver data, Model model) {
+        driverService.updateDriver(id, data);
+        model.addAttribute("drivers", driverService.getAllDriver());
+        model.addAttribute("newDriver", new Driver());
+        return "drivers";
     }
 
 }

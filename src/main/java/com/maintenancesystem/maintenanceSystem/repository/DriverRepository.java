@@ -29,7 +29,7 @@ public interface DriverRepository extends JpaRepository<Driver, Integer> {
         d.licenseExpirationDate = COALESCE(:licenseExpirationDate, d.licenseExpirationDate),
         d.status = COALESCE(:status, d.status)
     WHERE d.idDriver = :idDriver""")
-    int updatePartial(
+    void updatePartial(
             @Param("idDriver") Integer idDriver,
             @Param("firstName") String firstName,
             @Param("lastName") String lastName,

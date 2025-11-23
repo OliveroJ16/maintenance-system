@@ -26,18 +26,14 @@ public class VehicleService {
         vehicleRepository.save(vehicle);
     }
 
-    public boolean deleteVehicle(Integer id) {
-        if (!vehicleRepository.existsById(id)) {
-            return false;
-        }
+    public void deleteVehicle(Integer id) {
         vehicleRepository.deleteById(id);
-        return true;
     }
 
-    public boolean updateVehicle(Integer id, Vehicle vehicle) {
+    public void updateVehicle(Integer id, Vehicle vehicle) {
         vehicle.setModel(stringNormalizer.toTitleCase(vehicle.getModel()));
         vehicle.setBrand(stringNormalizer.toTitleCase(vehicle.getBrand()));
-        int rows = vehicleRepository.updatePartial(
+        vehicleRepository.updatePartial(
                 id,
                 vehicle.getPlate(),
                 vehicle.getSerialNumber(),
@@ -49,8 +45,6 @@ public class VehicleService {
                 vehicle.getModel(),
                 vehicle.getVehicleType()
         );
-
-        return rows > 0;
     }
 }
 

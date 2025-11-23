@@ -31,7 +31,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Integer> {
             v.vehicleType = COALESCE(:vehicleType, v.vehicleType)
         WHERE v.idVehicle = :idVehicle
         """)
-    int updatePartial(
+    void updatePartial(
             @Param("idVehicle") Integer idVehicle,
             @Param("plate") String plate,
             @Param("serialNumber") String serialNumber,

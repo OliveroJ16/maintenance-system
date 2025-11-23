@@ -26,19 +26,14 @@ public class DriverService {
         driverRepository.save(driver);
     }
 
-    public boolean deleteDriver(Integer id) {
-        if (!driverRepository.existsById(id)) {
-            return false;
-        }
-
+    public void deleteDriver(Integer id) {
         driverRepository.deleteById(id);
-        return true;
     }
 
-    public boolean updateDriver(Integer id, Driver driver) {
+    public void updateDriver(Integer id, Driver driver) {
         driver.setFirstName(stringNormalizer.toTitleCase(driver.getFirstName()));
         driver.setLastName(stringNormalizer.toTitleCase(driver.getLastName()));
-        int rows = driverRepository.updatePartial(
+        driverRepository.updatePartial(
                 id,
                 driver.getFirstName(),
                 driver.getLastName(),
@@ -49,8 +44,6 @@ public class DriverService {
                 driver.getLicenseExpirationDate(),
                 driver.getStatus()
         );
-
-        return rows > 0;
     }
 
 }
