@@ -45,4 +45,8 @@ public class WorkshopService {
         );
 
     }
+
+    public Workshop getWorkshopById(Integer id) {
+        return workshopRepository.findById(id).orElseThrow();
+    }
 }

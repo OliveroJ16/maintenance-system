@@ -33,6 +33,9 @@ window.addEventListener("click", function (event) {
         'vehicleModal',
         'maintenanceModal',
         'workshopModal',
+        'editWorkshopModal',
+        'serviceModal',           // ⬅️ NUEVO
+        'editServiceModal',       // ⬅️ NUEVO
         'driverModal'
     ];
 
