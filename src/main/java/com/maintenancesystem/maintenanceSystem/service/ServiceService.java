@@ -19,7 +19,27 @@ public class ServiceService {
     }
 
     public void saveService(com.maintenancesystem.maintenanceSystem.entity.Service service){
+        service.setServiceName(stringNormalizer.toTitleCase(service.getServiceName()));
+        service.setDescription(stringNormalizer.toTitleCase(service.getDescription()));
         serviceRepository.save(service);
     }
+
+    public void updateService(com.maintenancesystem.maintenanceSystem.entity.Service service, Integer id) {
+        service.setServiceName(stringNormalizer.toTitleCase(service.getServiceName()));
+        service.setDescription(stringNormalizer.toTitleCase(service.getDescription()));
+        serviceRepository.updatePartial(
+                id,
+                service.getServiceName(),
+                service.getDescription(),
+                service.getCost(),
+                service.getDurationMinutes(),
+                service.getStatus()
+        );
+    }
+
+    public void deleteService(Integer id){
+        serviceRepository.deleteById(id);
+    }
+
 
 }

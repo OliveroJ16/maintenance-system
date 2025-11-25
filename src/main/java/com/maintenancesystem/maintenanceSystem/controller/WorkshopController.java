@@ -27,7 +27,6 @@ public class WorkshopController {
         model.addAttribute("newService", new Service());
         model.addAttribute("editService", new Service());
         model.addAttribute("services", List.of());
-
         return "workshops";
     }
 
@@ -75,13 +74,8 @@ public class WorkshopController {
     @GetMapping("/{id}/services")
     public String services(@PathVariable Integer id, Model model){
         List<Service> services = serviceService.getAllService(id);
-
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
         model.addAttribute("services", services);
-        model.addAttribute("newWorkshop", new Workshop());
-        model.addAttribute("newService", new Service());
-        model.addAttribute("editService", new Service());
-
-        return "workshops";
+        return "workshops-services-table :: servicesTable";
     }
+
 }

@@ -34,9 +34,9 @@ window.addEventListener("click", function (event) {
         'maintenanceModal',
         'workshopModal',
         'editWorkshopModal',
-        'serviceModal',           // ⬅️ NUEVO
-        'editServiceModal',       // ⬅️ NUEVO
-        'driverModal'
+        'serviceModal',
+        'editServiceModal',
+        'servicesManagementModal' 
     ];
 
     modals.forEach(modalId => {

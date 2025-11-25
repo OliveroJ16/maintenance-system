@@ -1,7 +1,3 @@
-// ============================================
-// GESTIÓN DE TALLERES (usando CRUDManager)
-// ============================================
-
 const workshopsManager = new CRUDManager({
     entity: 'workshops',
     entityName: 'taller',
@@ -31,10 +27,6 @@ window.editWorkshop = function(button) {
     };
     workshopsManager.openEditModal(workshopData);
 };
-
-
-
-
 // ============================================
 // GESTIÓN DE SERVICIOS (usando CRUDManager)
 // ============================================
@@ -43,7 +35,7 @@ const servicesManager = new CRUDManager({
     entity: 'services',
     entityName: 'servicio',
     endpoint: '/services',
-    tableId: 'servicesTable',
+    tableId: 'servicesModalTable',
     modalPrefix: 'service'
 });
 
@@ -51,24 +43,101 @@ const servicesManager = new CRUDManager({
 let currentWorkshopId = null;
 let currentWorkshopName = '';
 
-// Inicializar si estamos en vista de servicios
-document.addEventListener('DOMContentLoaded', function() {
-    const serviceSection = document.querySelector('[data-workshop-id]');
-    if (serviceSection) {
-        currentWorkshopId = serviceSection.getAttribute('data-workshop-id');
-        currentWorkshopName = serviceSection.getAttribute('data-workshop-name');
+// ✅ ABRIR MODAL DE SERVICIOS Y CARGAR DINÁMICAMENTE
+window.openServicesModal = async function(button) {
+    currentWorkshopId = button.getAttribute('data-workshop-id');
+    currentWorkshopName = button.getAttribute('data-workshop-name');
+    
+    // Mostrar modal
+    const modal = document.getElementById('servicesManagementModal');
+    modal.classList.remove('hidden');
+    
+    // Actualizar título
+    document.getElementById('servicesModalTitle').textContent = `Servicios de ${currentWorkshopName}`;
+    
+    // Cargar servicios
+    await loadServicesInManagementModal();
+};
+
+// ✅ CARGAR SERVICIOS SIN REDIRIGIR (fetch HTML del servidor)
+async function loadServicesInManagementModal() {
+    const content = document.getElementById('servicesManagementContent');
+    content.innerHTML = '<div style="text-align: center; padding: 40px;"><p>Cargando servicios...</p></div>';
+    
+    try {
+        // Hacer fetch al endpoint que retorna solo la tabla HTML
+        const response = await fetch(`/workshops/${currentWorkshopId}/services`);
+        const html = await response.text();
+        
+        content.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error cargando servicios:', error);
+        content.innerHTML = '<div style="text-align: center; padding: 40px; color: red;"><p>Error al cargar servicios</p></div>';
     }
-});
+}
+
+// ✅ CERRAR MODAL DE GESTIÓN DE SERVICIOS
+window.closeServicesManagementModal = function() {
+    document.getElementById('servicesManagementModal').classList.add('hidden');
+};
 
 // Funciones para servicios
-window.confirmDeleteService = (id) => servicesManager.confirmDelete(id);
+window.confirmDeleteService = async (id) => {
+    Swal.fire({
+        title: '¿Eliminar servicio?',
+        text: "Esta acción no se puede revertir",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#e3342f",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/services/delete/${id}`);
+                if (response.ok) {
+                    Swal.fire({
+                        title: "¡Eliminado!",
+                        text: "El servicio fue eliminado correctamente",
+                        icon: "success",
+                        confirmButtonColor: "#6366f1",
+                        timer: 1500
+                    });
+                    // Recargar solo la tabla del modal
+                    await loadServicesInManagementModal();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    });
+};
+
 window.closeServiceModal = () => servicesManager.closeModal();
 window.closeEditServiceModal = () => servicesManager.closeEditModal();
-window.searchServicesInModal = (value) => servicesManager.search(value);
+
+// Búsqueda en el modal de gestión
+window.searchServicesInManagementModal = function(value) {
+    const normalize = (str) =>
+        str.normalize("NFD")
+           .replace(/[\u0300-\u036f]/g, "")
+           .toLowerCase();
+
+    const filter = normalize(value);
+    const rows = document.querySelectorAll('#servicesModalTable tbody tr');
+
+    rows.forEach(row => {
+        const rowText = normalize(row.textContent);
+        row.style.display = rowText.includes(filter) ? '' : 'none';
+    });
+};
 
 // Abrir modal de crear servicio (con workshopId)
 window.openServiceModal = function() {
     servicesManager.openModal();
+    
     
     // Agregar workshopId al formulario
     const form = document.getElementById('serviceForm');
@@ -85,14 +154,13 @@ window.openServiceModal = function() {
     document.getElementById('serviceModalTitle').textContent = `Nuevo Servicio - ${currentWorkshopName}`;
 };
 
-// Guardar servicio (con workshopId)
+// ✅ GUARDAR SERVICIO Y RECARGAR SOLO LA TABLA DEL MODAL
 window.saveService = async function(event) {
     event.preventDefault();
 
     const form = document.getElementById('serviceForm');
     const formData = new FormData(form);
     
-    // Asegurar que workshopId esté en el FormData
     if (!formData.get('workshopId') && currentWorkshopId) {
         formData.append('workshopId', currentWorkshopId);
     }
@@ -109,9 +177,12 @@ window.saveService = async function(event) {
                 title: "¡Servicio guardado!",
                 text: "El servicio fue agregado correctamente",
                 icon: "success",
-                confirmButtonColor: "#6366f1"
+                confirmButtonColor: "#6366f1",
+                timer: 1500
             });
-            setTimeout(() => window.location.reload(), 500);
+            
+            // ✅ Recargar solo la tabla dentro del modal
+            await loadServicesInManagementModal();
         } else {
             servicesManager.showError("No se pudo guardar el servicio");
         }
@@ -134,7 +205,7 @@ window.editService = function(button) {
     servicesManager.openEditModal(serviceData);
 };
 
-// Actualizar servicio
+// ✅ ACTUALIZAR SERVICIO Y RECARGAR SOLO LA TABLA DEL MODAL
 window.updateService = async function(event) {
     event.preventDefault();
 
@@ -154,9 +225,12 @@ window.updateService = async function(event) {
                 title: "Actualizado",
                 text: "El servicio fue actualizado correctamente",
                 icon: "success",
-                confirmButtonColor: "#6366f1"
+                confirmButtonColor: "#6366f1",
+                timer: 1500
             });
-            setTimeout(() => window.location.reload(), 500);
+            
+            // ✅ Recargar solo la tabla dentro del modal
+            await loadServicesInManagementModal();
         } else {
             servicesManager.showError("No se pudo actualizar el servicio");
         }

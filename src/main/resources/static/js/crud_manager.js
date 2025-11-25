@@ -37,7 +37,15 @@ class CRUDManager {
                     icon: "success",
                     confirmButtonColor: "#6366f1"
                 });
-                setTimeout(() => loadSection(this.entity), 500);
+                
+                // VERIFICADO: Usa loadSection global
+                setTimeout(() => {
+                    if (typeof loadSection === 'function') {
+                        loadSection(this.entity);
+                    } else {
+                        console.error('loadSection no está definida globalmente');
+                    }
+                }, 500);
             } else {
                 this.showError(`No se pudo eliminar el ${this.entityName}.`);
             }
@@ -115,7 +123,15 @@ class CRUDManager {
                     icon: "success",
                     confirmButtonColor: "#6366f1"
                 });
-                setTimeout(() => loadSection(this.entity), 500);
+                
+                // VERIFICADO: Usa loadSection global
+                setTimeout(() => {
+                    if (typeof loadSection === 'function') {
+                        loadSection(this.entity);
+                    } else {
+                        console.error('loadSection no está definida globalmente');
+                    }
+                }, 500);
             } else {
                 this.showError("No se pudo completar la operación.");
             }
@@ -147,7 +163,15 @@ class CRUDManager {
                     icon: "success",
                     confirmButtonColor: "#6366f1"
                 });
-                setTimeout(() => loadSection(this.entity), 500);
+                
+                // VERIFICADO: Usa loadSection global
+                setTimeout(() => {
+                    if (typeof loadSection === 'function') {
+                        loadSection(this.entity);
+                    } else {
+                        console.error('loadSection no está definida globalmente');
+                    }
+                }, 500);
             } else {
                 this.showError(`No se pudo actualizar el ${this.entityName}`);
             }
