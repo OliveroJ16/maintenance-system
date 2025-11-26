@@ -24,7 +24,7 @@ window.switchTab = function (tabId) {
 };
 
 const maintenanceManager = new CRUDManager({
-    entity: 'mantenimientos',
+    entity: 'maintenance',
     entityName: 'mantenimiento',
     endpoint: '/maintenance',
     tableId: 'maintenanceTable',
@@ -60,7 +60,7 @@ window.editMaintenanceRecord = function (button) {
 //Tipos de mantenimiento
 
 const maintenanceTypeManager = new CRUDManager({
-    entity: 'maintenance-type',
+    entity: 'maintenance',
     entityName: 'tipo de mantenimiento',
     endpoint: '/maintenance-type',
     tableId: 'maintenanceTypeTable',
@@ -89,9 +89,9 @@ window.editType = function (button) {
 };
 
 const maintenanceConfigManager = new CRUDManager({
-    entity: 'configuraciones-mantenimiento',
+    entity: 'maintenance',
     entityName: 'configuración',
-    endpoint: '/configuraciones-mantenimiento',
+    endpoint: '/maintenance-config',
     tableId: 'configTable',
     modalPrefix: 'config'
 });
@@ -103,14 +103,16 @@ window.saveConfig = (e) => maintenanceConfigManager.save(e);
 window.updateConfig = (e) => maintenanceConfigManager.update(e);
 window.closeEditConfigModal = () => maintenanceConfigManager.closeEditModal();
 window.confirmDeleteConfig = (id) => maintenanceConfigManager.confirmDelete(id);
+window.searchConfig = (value) => maintenanceConfigManager.search(value);
 
 window.editConfig = function (button) {
     const data = {
         idConfig: button.getAttribute('data-id'),
-        idVehicle: button.getAttribute('data-vehicle'),
-        idMaintenanceType: button.getAttribute('data-type'),
-        kmInterval: button.getAttribute('data-km'),
-        monthInterval: button.getAttribute('data-months')
+        'vehicle.idVehicle': button.getAttribute('data-vehicle'),
+        'maintenanceType.idMaintenanceType': button.getAttribute('data-type'),
+        frequencyKm: button.getAttribute('data-km'),
+        frequencyMonths: button.getAttribute('data-months'),
+        description: button.getAttribute('data-description')
     };
     maintenanceConfigManager.openEditModal(data);
 };
