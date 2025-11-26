@@ -2,7 +2,9 @@ package com.maintenancesystem.maintenanceSystem.controller;
 
 import com.maintenancesystem.maintenanceSystem.entity.Driver;
 import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
+import com.maintenancesystem.maintenanceSystem.entity.MaintenanceType;
 import com.maintenancesystem.maintenanceSystem.service.MaintenanceService;
+import com.maintenancesystem.maintenanceSystem.service.MaintenanceTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,7 @@ import java.util.List;
 public class MaintenanceController {
 
     private final MaintenanceService maintenanceService;
+    private final MaintenanceTypeService maintenanceTypeService;
 
     @GetMapping("/maintenance")
     public String maintenances(Model model) {
@@ -23,6 +26,8 @@ public class MaintenanceController {
 
         model.addAttribute("maintenances", maintenances);
         model.addAttribute("newMaintenance", new Maintenance());
+        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
+        model.addAttribute("newMaintenanceType", new MaintenanceType());
 
         return "maintenance";
     }

@@ -1,6 +1,6 @@
-window.switchTab = function(tabId) {
+window.switchTab = function (tabId) {
     const tabs = ['tab-mantenimientos', 'tab-tipos', 'tab-config'];
-    
+
     tabs.forEach(tab => {
         const element = document.getElementById(tab);
         if (element) element.style.display = 'none';
@@ -26,7 +26,7 @@ window.switchTab = function(tabId) {
 const maintenanceManager = new CRUDManager({
     entity: 'mantenimientos',
     entityName: 'mantenimiento',
-    endpoint: '/mantenimientos',
+    endpoint: '/maintenance',
     tableId: 'maintenanceTable',
     modalPrefix: 'maintenance'
 });
@@ -40,7 +40,7 @@ window.closeEditMaintenanceModal = () => maintenanceManager.closeEditModal();
 window.confirmDeleteMaintenance = (id) => maintenanceManager.confirmDelete(id);
 window.searchMaintenance = (value) => maintenanceManager.search(value);
 
-window.editMaintenanceRecord = function(button) {
+window.editMaintenanceRecord = function (button) {
     const data = {
         idMaintenance: button.getAttribute('data-id'),
         scheduledDate: button.getAttribute('data-scheduleddate'),
@@ -56,11 +56,14 @@ window.editMaintenanceRecord = function(button) {
 };
 
 
+
+//Tipos de mantenimiento
+
 const maintenanceTypeManager = new CRUDManager({
-    entity: 'tipos-mantenimiento',
+    entity: 'maintenance-type',
     entityName: 'tipo de mantenimiento',
-    endpoint: '/tipos-mantenimiento',
-    tableId: 'typeTable',
+    endpoint: '/maintenance-type',
+    tableId: 'maintenanceTypeTable',
     modalPrefix: 'type'
 });
 
@@ -71,14 +74,17 @@ window.saveType = (e) => maintenanceTypeManager.save(e);
 window.updateType = (e) => maintenanceTypeManager.update(e);
 window.closeEditTypeModal = () => maintenanceTypeManager.closeEditModal();
 window.confirmDeleteType = (id) => maintenanceTypeManager.confirmDelete(id);
+window.searchMaintenanceTypes = (value) => maintenanceTypeManager.search(value);
 
-window.editType = function(button) {
+window.editType = function (button) {
     const data = {
         idMaintenanceType: button.getAttribute('data-id'),
-        name: button.getAttribute('data-name'),
+        typeName: button.getAttribute('data-name'),
         category: button.getAttribute('data-category'),
-        priority: button.getAttribute('data-priority')
+        priority: button.getAttribute('data-priority'),
+        description: button.getAttribute('data-description')
     };
+
     maintenanceTypeManager.openEditModal(data);
 };
 
@@ -98,7 +104,7 @@ window.updateConfig = (e) => maintenanceConfigManager.update(e);
 window.closeEditConfigModal = () => maintenanceConfigManager.closeEditModal();
 window.confirmDeleteConfig = (id) => maintenanceConfigManager.confirmDelete(id);
 
-window.editConfig = function(button) {
+window.editConfig = function (button) {
     const data = {
         idConfig: button.getAttribute('data-id'),
         idVehicle: button.getAttribute('data-vehicle'),

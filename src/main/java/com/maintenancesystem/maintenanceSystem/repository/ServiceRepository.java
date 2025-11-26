@@ -1,7 +1,6 @@
 package com.maintenancesystem.maintenanceSystem.repository;
 
 import com.maintenancesystem.maintenanceSystem.entity.Service;
-import com.maintenancesystem.maintenanceSystem.entity.Workshop;
 import com.maintenancesystem.maintenanceSystem.enums.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
