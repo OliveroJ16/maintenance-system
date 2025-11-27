@@ -116,3 +116,47 @@ window.editConfig = function (button) {
     };
     maintenanceConfigManager.openEditModal(data);
 };
+
+// Función para cargar servicios del taller seleccionado
+window.loadWorkshopServices = async function(workshopId) {
+    const servicesContainer = document.getElementById('servicesContainer');
+    const servicesList = document.getElementById('servicesList');
+    
+    if (!workshopId) {
+        servicesContainer.style.display = 'none';
+        servicesList.innerHTML = '';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/workshop/${workshopId}/services`);
+        const services = await response.json();
+        
+        if (services.length === 0) {
+            servicesList.innerHTML = '<p style="color: #666;">Este taller no tiene servicios registrados</p>';
+        } else {
+            servicesList.innerHTML = services.map(service => `
+                <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+                    <input type="checkbox" 
+                           name="services" 
+                           value="${service.idService}" 
+                           id="service_${service.idService}"
+                           style="margin-right: 10px;">
+                    <label for="service_${service.idService}" style="flex: 1; margin: 0; cursor: pointer;">
+                        <strong>${service.serviceName}</strong>
+                        <br>
+                        <small style="color: #666;">${service.description || 'Sin descripción'}</small>
+                        <br>
+                        <span style="color: #2563eb; font-weight: 600;">$${service.cost}</span>
+                        ${service.durationMinutes ? ` - ${service.durationMinutes} min` : ''}
+                    </label>
+                </div>
+            `).join('');
+        }
+        
+        servicesContainer.style.display = 'block';
+    } catch (error) {
+        console.error('Error loading services:', error);
+        servicesList.innerHTML = '<p style="color: red;">Error al cargar servicios</p>';
+    }
+};

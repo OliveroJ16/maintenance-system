@@ -59,20 +59,49 @@
                         <th>Vehículo</th>
                         <th>Tipo Mantenimiento</th>
                         <th>Taller</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <tr th:each="m : ${maintenances}">
-                        <td th:text="${m.idMaintenance}"></td>
                         <td th:text="${m.scheduledDate}"></td>
                         <td th:text="${m.scheduledKm}"></td>
-                        <td th:text="${m.executionDate}"></td>
-                        <td th:text="${m.executionKm}"></td>
+                        <td th:text="${m.executionDate ?: '—'}"></td>
+                        <td th:text="${m.executionKm ?: '—'}"></td>
                         <td th:text="${m.status}"></td>
-                        <td th:text="${m.vehicle != null ? m.vehicle.name : '—'}"></td>
-                        <td th:text="${m.maintenanceType != null ? m.maintenanceType.name : '—'}"></td>
-                        <td th:text="${m.workshop != null ? m.workshop.name : 'No asignado'}"></td>
+                        <td th:text="${m.vehicle != null ? m.vehicle.plate : '—'}"></td>
+                        <td th:text="${m.maintenanceType != null ? m.maintenanceType.typeName : '—'}"></td>
+                        <td th:text="${m.workshop != null ? m.workshop.workshopName : 'No asignado'}"></td>
+                        <td>
+                            <div class="action-buttons">
+                                <!-- EDITAR -->
+                                <button class="icon-btn edit" onclick="editMaintenanceRecord(this)"
+                                    th:data-id="${m.idMaintenance}" th:data-scheduleddate="${m.scheduledDate}"
+                                    th:data-scheduledkm="${m.scheduledKm}" th:data-executiondate="${m.executionDate}"
+                                    th:data-executionkm="${m.executionKm}" th:data-status="${m.status}"
+                                    th:data-vehicle="${m.vehicle != null ? m.vehicle.idVehicle : ''}"
+                                    th:data-type="${m.maintenanceType != null ? m.maintenanceType.idMaintenanceType : ''}"
+                                    th:data-workshop="${m.workshop != null ? m.workshop.idWorkshop : ''}"
+                                    th:data-description="${m.description}">
+
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+
+                                <!-- ELIMINAR -->
+                                <button class="icon-btn delete"
+                                    th:onclick="'confirmDeleteMaintenance(' + ${m.idMaintenance} + ')'">
+
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -272,202 +301,387 @@
 
 
     <!-- ------------------------------------------------------------------ -->
-<!-- 🔵 TAB 3: CONFIGURACIONES -->
-<!-- ------------------------------------------------------------------ -->
+    <!-- 🔵 TAB 3: CONFIGURACIONES -->
+    <!-- ------------------------------------------------------------------ -->
 
-<div id="tab-config" class="section-card" style="display:none;">
+    <div id="tab-config" class="section-card" style="display:none;">
 
-    <div class="section-header">
-        <div class="section-title">
-            <h2>Configuraciones de Mantenimiento</h2>
-            <p>Frecuencias por vehículo y tipo</p>
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Configuraciones de Mantenimiento</h2>
+                <p>Frecuencias por vehículo y tipo</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="openConfigModal()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Nueva Configuración
+            </button>
         </div>
 
-        <button class="btn btn-primary" onclick="openConfigModal()">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Nueva Configuración
-        </button>
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar configuración..." onkeyup="searchConfig(this.value)">
+        </div>
+
+        <div class="table-container">
+            <table id="configTable">
+                <thead>
+                    <tr>
+                        <th>Vehículo</th>
+                        <th>Tipo Mantenimiento</th>
+                        <th>Frecuencia KM</th>
+                        <th>Frecuencia Meses</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="c : ${configs}">
+                        <td th:text="${c.vehicle != null ? c.vehicle.plate : '—'}">ABC-123</td>
+                        <td th:text="${c.maintenanceType != null ? c.maintenanceType.typeName : '—'}">Cambio de Aceite
+                        </td>
+                        <td th:text="${c.frequencyKm != null ? c.frequencyKm + ' km' : '—'}">7000 km</td>
+                        <td th:text="${c.frequencyMonths != null ? c.frequencyMonths + ' meses' : '—'}">6 meses</td>
+                        <td th:text="${c.description ?: '—'}">Descripción</td>
+                        <td>
+                            <div class="action-buttons">
+                                <!-- EDITAR -->
+                                <button class="icon-btn edit" onclick="editConfig(this)"
+                                    th:data-id="${c.idMaintenanceConfig}"
+                                    th:data-vehicle="${c.vehicle != null ? c.vehicle.idVehicle : ''}"
+                                    th:data-type="${c.maintenanceType != null ? c.maintenanceType.idMaintenanceType : ''}"
+                                    th:data-km="${c.frequencyKm}" th:data-months="${c.frequencyMonths}"
+                                    th:data-description="${c.description}">
+
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+
+                                <!-- ELIMINAR -->
+                                <button class="icon-btn delete"
+                                    th:onclick="'confirmDeleteConfig(' + ${c.idMaintenanceConfig} + ')'">
+
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div> <!-- END TAB 3 -->
+
+    <!-- ========================================== -->
+    <!-- MODAL: CREAR CONFIGURACIÓN -->
+    <!-- ========================================== -->
+    <div id="configModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="configModalTitle">Nueva Configuración de Mantenimiento</h3>
+                <button class="close-btn" onclick="closeConfigModal()">&times;</button>
+            </div>
+
+            <form id="configForm" th:action="@{/maintenance-config}" th:object="${newConfig}" method="post"
+                onsubmit="saveConfig(event)">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Vehículo</label>
+                        <select th:field="*{vehicle.idVehicle}" required>
+                            <option value="">Seleccionar vehículo</option>
+                            <option th:each="v : ${vehicles}" th:value="${v.idVehicle}"
+                                th:text="${v.plate + ' - ' + v.brand + ' ' + v.model}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Mantenimiento</label>
+                        <select th:field="*{maintenanceType.idMaintenanceType}" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option th:each="mt : ${maintenanceTypes}" th:value="${mt.idMaintenanceType}"
+                                th:text="${mt.typeName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Frecuencia en KM</label>
+                        <input type="number" th:field="*{frequencyKm}" placeholder="ej: 5000" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Frecuencia en Meses</label>
+                        <input type="number" th:field="*{frequencyMonths}" placeholder="ej: 6" min="0">
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Descripción</label>
+                        <textarea th:field="*{description}" rows="3"
+                            placeholder="Detalles adicionales sobre esta configuración"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeConfigModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="search-bar">
-        <input type="text" placeholder="Buscar configuración..." onkeyup="searchConfig(this.value)">
+    <!-- ========================================== -->
+    <!-- MODAL: EDITAR CONFIGURACIÓN -->
+    <!-- ========================================== -->
+    <div id="editConfigModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Configuración de Mantenimiento</h3>
+                <button class="close-btn" onclick="closeEditConfigModal()">&times;</button>
+            </div>
+
+            <form id="editConfigForm" onsubmit="updateConfig(event)">
+                <input type="hidden" name="idConfig">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Vehículo</label>
+                        <select name="vehicle.idVehicle" required>
+                            <option value="">Seleccionar vehículo</option>
+                            <option th:each="v : ${vehicles}" th:value="${v.idVehicle}"
+                                th:text="${v.plate + ' - ' + v.brand + ' ' + v.model}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Mantenimiento</label>
+                        <select name="maintenanceType.idMaintenanceType" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option th:each="mt : ${maintenanceTypes}" th:value="${mt.idMaintenanceType}"
+                                th:text="${mt.typeName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Frecuencia en KM</label>
+                        <input type="number" name="frequencyKm" placeholder="ej: 5000" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Frecuencia en Meses</label>
+                        <input type="number" name="frequencyMonths" placeholder="ej: 6" min="0">
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Descripción</label>
+                        <textarea name="description" rows="3"
+                            placeholder="Detalles adicionales sobre esta configuración"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditConfigModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="table-container">
-        <table id="configTable">
-            <thead>
-                <tr>
-                    <th>Vehículo</th>
-                    <th>Tipo Mantenimiento</th>
-                    <th>Frecuencia KM</th>
-                    <th>Frecuencia Meses</th>
-                    <th>Descripción</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
+    <!-- ========================================== -->
+    <!-- MODAL: CREAR MANTENIMIENTO -->
+    <!-- ========================================== -->
+    <div id="maintenanceModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="maintenanceModalTitle">Nuevo Mantenimiento</h3>
+                <button class="close-btn" onclick="closeMaintenanceModal()">&times;</button>
+            </div>
 
-            <tbody>
-                <tr th:each="c : ${configs}">
-                    <td th:text="${c.vehicle != null ? c.vehicle.plate : '—'}">ABC-123</td>
-                    <td th:text="${c.maintenanceType != null ? c.maintenanceType.typeName : '—'}">Cambio de Aceite</td>
-                    <td th:text="${c.frequencyKm != null ? c.frequencyKm + ' km' : '—'}">7000 km</td>
-                    <td th:text="${c.frequencyMonths != null ? c.frequencyMonths + ' meses' : '—'}">6 meses</td>
-                    <td th:text="${c.description ?: '—'}">Descripción</td>
-                    <td>
-                        <div class="action-buttons">
-                            <!-- EDITAR -->
-                            <button class="icon-btn edit" onclick="editConfig(this)"
-                                th:data-id="${c.idMaintenanceConfig}"
-                                th:data-vehicle="${c.vehicle != null ? c.vehicle.idVehicle : ''}"
-                                th:data-type="${c.maintenanceType != null ? c.maintenanceType.idMaintenanceType : ''}"
-                                th:data-km="${c.frequencyKm}"
-                                th:data-months="${c.frequencyMonths}"
-                                th:data-description="${c.description}">
-                                
-                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </button>
+            <form id="maintenanceForm" th:action="@{/maintenance}" th:object="${newMaintenance}" method="post"
+                onsubmit="saveMaintenanceRecord(event)">
 
-                            <!-- ELIMINAR -->
-                            <button class="icon-btn delete"
-                                th:onclick="'confirmDeleteConfig(' + ${c.idMaintenanceConfig} + ')'">
-                                
-                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Fecha Programada <span style="color: red;">*</span></label>
+                        <input type="date" th:field="*{scheduledDate}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>KM Programado <span style="color: red;">*</span></label>
+                        <input type="number" th:field="*{scheduledKm}" placeholder="ej: 50000" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fecha de Ejecución</label>
+                        <input type="date" th:field="*{executionDate}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>KM de Ejecución</label>
+                        <input type="number" th:field="*{executionKm}" placeholder="ej: 50100" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado <span style="color: red;">*</span></label>
+                        <select th:field="*{status}" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="EN_PROCESO">En Proceso</option>
+                            <option value="COMPLETADO">Completado</option>
+                            <option value="CANCELADO">Cancelado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vehículo <span style="color: red;">*</span></label>
+                        <select th:field="*{vehicle.idVehicle}" required>
+                            <option value="">Seleccionar vehículo</option>
+                            <option th:each="v : ${vehicles}" th:value="${v.idVehicle}"
+                                th:text="${v.plate + ' - ' + v.brand + ' ' + v.model}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Mantenimiento <span style="color: red;">*</span></label>
+                        <select th:field="*{maintenanceType.idMaintenanceType}" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option th:each="mt : ${maintenanceTypes}" th:value="${mt.idMaintenanceType}"
+                                th:text="${mt.typeName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Taller <span style="color: red;">*</span></label>
+                        <select th:field="*{workshop.idWorkshop}" id="workshopSelect"
+                            onchange="loadWorkshopServices(this.value)" required>
+                            <option value="">Seleccionar taller</option>
+                            <option th:each="w : ${workshops}" th:value="${w.idWorkshop}" th:text="${w.workshopName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Servicios disponibles del taller -->
+                    <div class="form-group" id="servicesContainer" style="grid-column: span 2; display: none;">
+                        <label>Servicios a Realizar</label>
+                        <div id="servicesList"
+                            style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                            <!-- Los servicios se cargarán dinámicamente aquí -->
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                    </div>
 
-</div> <!-- END TAB 3 -->
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Descripción</label>
+                        <textarea th:field="*{description}" rows="3"
+                            placeholder="Detalles adicionales sobre el mantenimiento"></textarea>
+                    </div>
+                </div>
 
-<!-- ========================================== -->
-<!-- MODAL: CREAR CONFIGURACIÓN -->
-<!-- ========================================== -->
-<div id="configModal" class="modal hidden">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="configModalTitle">Nueva Configuración de Mantenimiento</h3>
-            <button class="close-btn" onclick="closeConfigModal()">&times;</button>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeMaintenanceModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
         </div>
-
-        <form id="configForm" th:action="@{/maintenance-config}" th:object="${newConfig}"
-            method="post" onsubmit="saveConfig(event)">
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Vehículo</label>
-                    <select th:field="*{vehicle.idVehicle}" required>
-                        <option value="">Seleccionar vehículo</option>
-                        <option th:each="v : ${vehicles}" 
-                                th:value="${v.idVehicle}" 
-                                th:text="${v.plate + ' - ' + v.brand + ' ' + v.model}">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Tipo de Mantenimiento</label>
-                    <select th:field="*{maintenanceType.idMaintenanceType}" required>
-                        <option value="">Seleccionar tipo</option>
-                        <option th:each="mt : ${maintenanceTypes}" 
-                                th:value="${mt.idMaintenanceType}" 
-                                th:text="${mt.typeName}">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Frecuencia en KM</label>
-                    <input type="number" th:field="*{frequencyKm}" placeholder="ej: 5000" min="0">
-                </div>
-
-                <div class="form-group">
-                    <label>Frecuencia en Meses</label>
-                    <input type="number" th:field="*{frequencyMonths}" placeholder="ej: 6" min="0">
-                </div>
-
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Descripción</label>
-                    <textarea th:field="*{description}" rows="3" 
-                        placeholder="Detalles adicionales sobre esta configuración"></textarea>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeConfigModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Guardar</button>
-            </div>
-        </form>
     </div>
-</div>
 
-<!-- ========================================== -->
-<!-- MODAL: EDITAR CONFIGURACIÓN -->
-<!-- ========================================== -->
-<div id="editConfigModal" class="modal hidden">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Editar Configuración de Mantenimiento</h3>
-            <button class="close-btn" onclick="closeEditConfigModal()">&times;</button>
+    <!-- ========================================== -->
+    <!-- MODAL: EDITAR MANTENIMIENTO -->
+    <!-- ========================================== -->
+    <div id="editMaintenanceModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Mantenimiento</h3>
+                <button class="close-btn" onclick="closeEditMaintenanceModal()">&times;</button>
+            </div>
+
+            <form id="editMaintenanceForm" onsubmit="updateMaintenanceRecord(event)">
+                <input type="hidden" name="idMaintenance">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Fecha Programada <span style="color: red;">*</span></label>
+                        <input type="date" name="scheduledDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>KM Programado <span style="color: red;">*</span></label>
+                        <input type="number" name="scheduledKm" placeholder="ej: 50000" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fecha de Ejecución</label>
+                        <input type="date" name="executionDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label>KM de Ejecución</label>
+                        <input type="number" name="executionKm" placeholder="ej: 50100" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado <span style="color: red;">*</span></label>
+                        <select name="status" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="EN_PROCESO">En Proceso</option>
+                            <option value="COMPLETADO">Completado</option>
+                            <option value="CANCELADO">Cancelado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vehículo <span style="color: red;">*</span></label>
+                        <select name="vehicle.idVehicle" required>
+                            <option value="">Seleccionar vehículo</option>
+                            <option th:each="v : ${vehicles}" th:value="${v.idVehicle}"
+                                th:text="${v.plate + ' - ' + v.brand + ' ' + v.model}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Mantenimiento <span style="color: red;">*</span></label>
+                        <select name="maintenanceType.idMaintenanceType" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option th:each="mt : ${maintenanceTypes}" th:value="${mt.idMaintenanceType}"
+                                th:text="${mt.typeName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Taller</label>
+                        <select name="workshop.idWorkshop">
+                            <option value="">Seleccionar taller</option>
+                            <option th:each="w : ${workshops}" th:value="${w.idWorkshop}" th:text="${w.workshopName}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Descripción</label>
+                        <textarea name="description" rows="3"
+                            placeholder="Detalles adicionales sobre el mantenimiento"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeEditMaintenanceModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
         </div>
-
-        <form id="editConfigForm" onsubmit="updateConfig(event)">
-            <input type="hidden" name="idConfig">
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Vehículo</label>
-                    <select name="vehicle.idVehicle" required>
-                        <option value="">Seleccionar vehículo</option>
-                        <option th:each="v : ${vehicles}" 
-                                th:value="${v.idVehicle}" 
-                                th:text="${v.plate + ' - ' + v.brand + ' ' + v.model}">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Tipo de Mantenimiento</label>
-                    <select name="maintenanceType.idMaintenanceType" required>
-                        <option value="">Seleccionar tipo</option>
-                        <option th:each="mt : ${maintenanceTypes}" 
-                                th:value="${mt.idMaintenanceType}" 
-                                th:text="${mt.typeName}">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Frecuencia en KM</label>
-                    <input type="number" name="frequencyKm" placeholder="ej: 5000" min="0">
-                </div>
-
-                <div class="form-group">
-                    <label>Frecuencia en Meses</label>
-                    <input type="number" name="frequencyMonths" placeholder="ej: 6" min="0">
-                </div>
-
-                <div class="form-group" style="grid-column: span 2;">
-                    <label>Descripción</label>
-                    <textarea name="description" rows="3" 
-                        placeholder="Detalles adicionales sobre esta configuración"></textarea>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeEditConfigModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Actualizar</button>
-            </div>
-        </form>
     </div>
-</div>
