@@ -25,7 +25,7 @@ public class MaintenanceTypeController {
 
         model.addAttribute("maintenanceTypes", maintenanceTypes);
         model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
 
         return "maintenance";
@@ -42,7 +42,7 @@ public class MaintenanceTypeController {
         maintenanceTypeService.updateMaintenanceType(maintenanceType, id);
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         return "maintenance";
     }
@@ -52,7 +52,7 @@ public class MaintenanceTypeController {
         maintenanceTypeService.deleteMaintenanceType(id);
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         return "maintenance";
     }

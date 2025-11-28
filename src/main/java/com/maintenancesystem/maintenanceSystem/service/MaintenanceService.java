@@ -1,13 +1,8 @@
 package com.maintenancesystem.maintenanceSystem.service;
 
 import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
-import com.maintenancesystem.maintenanceSystem.entity.MaintenanceType;
-import com.maintenancesystem.maintenanceSystem.entity.Vehicle;
-import com.maintenancesystem.maintenanceSystem.entity.Workshop;
 import com.maintenancesystem.maintenanceSystem.repository.MaintenanceRepository;
-import com.maintenancesystem.maintenanceSystem.repository.MaintenanceTypeRepository;
-import com.maintenancesystem.maintenanceSystem.repository.VehicleRepository;
-import com.maintenancesystem.maintenanceSystem.repository.WorkshopRepository;
+import com.maintenancesystem.maintenanceSystem.enums.MaintenanceCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,79 +14,59 @@ import java.util.List;
 public class MaintenanceService {
 
     private final MaintenanceRepository maintenanceRepository;
-    private final VehicleRepository vehicleRepository;
-    private final MaintenanceTypeRepository maintenanceTypeRepository;
-    private final WorkshopRepository workshopRepository;
+    private final MaintenanceAlertService alertService; // ✅ Inyectar el servicio de alertas
 
-    public List<Maintenance> getAllMaintenance() {
+    /**
+     * Obtiene todos los mantenimientos
+     */
+    public List<Maintenance> getAllMaintenances() {
         return maintenanceRepository.findAll();
     }
 
-    public Maintenance getMaintenanceById(Integer id) {
-        return maintenanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mantenimiento no encontrado"));
-    }
-
+    /**
+     * Guarda un nuevo mantenimiento y genera alerta si es correctivo
+     */
     @Transactional
-    public Maintenance saveMaintenance(Maintenance maintenance) {
-        // Consultar el vehículo completo
-        Vehicle vehicle = vehicleRepository.findById(maintenance.getVehicle().getIdVehicle())
-                .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
+    public void saveMaintenance(Maintenance maintenance) {
+        // Guardar el mantenimiento
+        Maintenance savedMaintenance = maintenanceRepository.save(maintenance);
 
-        // Consultar el tipo de mantenimiento completo
-        MaintenanceType maintenanceType = maintenanceTypeRepository
-                .findById(maintenance.getMaintenanceType().getIdMaintenanceType())
-                .orElseThrow(() -> new RuntimeException("Tipo de mantenimiento no encontrado"));
+        // ✅ Si es mantenimiento CORRECTIVO, generar alerta automática
+        if (maintenance.getMaintenanceType() != null &&
+                maintenance.getMaintenanceType().getCategory() == MaintenanceCategory.CORRECTIVO) {
 
-        maintenance.setVehicle(vehicle);
-        maintenance.setMaintenanceType(maintenanceType);
-
-        // Workshop es opcional
-        if (maintenance.getWorkshop() != null && maintenance.getWorkshop().getIdWorkshop() != null) {
-            Workshop workshop = workshopRepository.findById(maintenance.getWorkshop().getIdWorkshop())
-                    .orElseThrow(() -> new RuntimeException("Taller no encontrado"));
-            maintenance.setWorkshop(workshop);
+            alertService.generateCorrectiveAlert(savedMaintenance);
         }
-
-        return maintenanceRepository.save(maintenance);
     }
 
+    /**
+     * Actualiza un mantenimiento existente
+     */
     @Transactional
-    public Maintenance updateMaintenance(Maintenance maintenance, Integer id) {
-        Maintenance existing = getMaintenanceById(id);
+    public void updateMaintenance(Integer id, Maintenance maintenance) {
+        Maintenance existing = maintenanceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mantenimiento no encontrado"));
 
-        // Consultar el vehículo completo
-        Vehicle vehicle = vehicleRepository.findById(maintenance.getVehicle().getIdVehicle())
-                .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
-
-        // Consultar el tipo de mantenimiento completo
-        MaintenanceType maintenanceType = maintenanceTypeRepository
-                .findById(maintenance.getMaintenanceType().getIdMaintenanceType())
-                .orElseThrow(() -> new RuntimeException("Tipo de mantenimiento no encontrado"));
-
+        // Actualizar campos necesarios
         existing.setScheduledDate(maintenance.getScheduledDate());
         existing.setScheduledKm(maintenance.getScheduledKm());
         existing.setExecutionDate(maintenance.getExecutionDate());
         existing.setExecutionKm(maintenance.getExecutionKm());
         existing.setStatus(maintenance.getStatus());
         existing.setDescription(maintenance.getDescription());
-        existing.setVehicle(vehicle);
-        existing.setMaintenanceType(maintenanceType);
 
-        // Workshop es opcional
-        if (maintenance.getWorkshop() != null && maintenance.getWorkshop().getIdWorkshop() != null) {
-            Workshop workshop = workshopRepository.findById(maintenance.getWorkshop().getIdWorkshop())
-                    .orElseThrow(() -> new RuntimeException("Taller no encontrado"));
-            existing.setWorkshop(workshop);
-        } else {
-            existing.setWorkshop(null);
-        }
-
-        return maintenanceRepository.save(existing);
+        maintenanceRepository.save(existing);
     }
 
+    /**
+     * Elimina un mantenimiento
+     */
     @Transactional
-    public void deleteMaintenance(Integer id) {
+    public boolean deleteMaintenance(Integer id) {
+        if (!maintenanceRepository.existsById(id)) {
+            return false;
+        }
         maintenanceRepository.deleteById(id);
+        return true;
     }
 }

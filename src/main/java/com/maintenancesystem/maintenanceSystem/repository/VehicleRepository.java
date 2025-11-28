@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Integer> {
@@ -43,4 +44,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Integer> {
             @Param("model") String model,
             @Param("vehicleType") VehicleType vehicleType
     );
+
+    @Query("SELECT v FROM Vehicle v WHERE v.status = :status")
+    List<Vehicle> findByStatus(@Param("status") VehicleStatus status);
+
 }

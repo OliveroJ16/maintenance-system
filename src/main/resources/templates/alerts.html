@@ -1,0 +1,198 @@
+<!-- DASHBOARD PRINCIPAL - Página de inicio del sistema -->
+<div class="header">
+    <div class="header-left">
+        <h1 id="pageTitle">🔔 Dashboard de Alertas</h1>
+        <p id="pageDescription">Monitoreo en tiempo real del estado de mantenimientos</p>
+    </div>
+</div>
+
+<!-- TARJETAS DE RESUMEN -->
+<div class="content-area">
+    <div class="stats-grid">
+        <div class="stat-card urgent-card">
+            <div class="stat-info">
+                <h3>Alertas Urgentes</h3>
+                <div class="stat-value" th:text="${summary.urgentes}">0</div>
+                <p class="stat-description">Vencidas o críticas</p>
+            </div>
+            <div class="stat-icon red">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>Notificadas</h3>
+                <div class="stat-value" th:text="${summary.notificadas}">0</div>
+                <p class="stat-description">Pendientes de atención</p>
+            </div>
+            <div class="stat-icon orange">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>Sin Ver</h3>
+                <div class="stat-value" th:text="${summary.noVistas}">0</div>
+                <p class="stat-description">No revisadas</p>
+            </div>
+            <div class="stat-icon blue">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <h3>Total Alertas</h3>
+                <div class="stat-value" th:text="${summary.total}">0</div>
+                <p class="stat-description">En el sistema</p>
+            </div>
+            <div class="stat-icon purple">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTAS URGENTES (si existen) -->
+    <div class="section-card urgent-section" th:if="${urgentAlerts != null && !#lists.isEmpty(urgentAlerts)}">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>⚠️ Alertas Urgentes - Requieren Atención Inmediata</h2>
+                <p>Alertas vencidas o próximas a vencer</p>
+            </div>
+        </div>
+        
+        <div class="urgent-alerts-grid">
+            <div class="urgent-alert-card" th:each="urgent : ${urgentAlerts}">
+                <div class="urgent-header">
+                    <span class="badge badge-danger" th:text="${urgent.alertType.name() == 'PREVENTIVA' ? 'PREVENTIVA' : 'CORRECTIVA'}">PREVENTIVA</span>
+                    <span class="vehicle-plate" th:text="${urgent.maintenanceConfiguration.vehicle.plate}">ABC-123</span>
+                </div>
+                <div class="urgent-body">
+                    <p class="urgent-message" th:text="${urgent.message}">Mantenimiento vencido hace 5 días</p>
+                    <div class="urgent-details">
+                        <small th:text="'Fecha: ' + ${#temporals.format(urgent.alertDate, 'dd/MM/yyyy')}">Fecha: 22/11/2025</small>
+                        <small th:text="'Vehículo: ' + ${urgent.maintenanceConfiguration.vehicle.brand} + ' ' + ${urgent.maintenanceConfiguration.vehicle.model}">Toyota Corolla</small>
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-sm" 
+                        th:if="${!urgent.viewed}"
+                        th:onclick="'markAlertAsViewed(' + ${urgent.idAlert} + ')'">
+                    Marcar como Vista
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTADO COMPLETO DE ALERTAS -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Alertas del Sistema</h2>
+                <p th:if="${filterType}" th:text="'Filtro activo: ' + ${filterType}">Todas las alertas ordenadas por prioridad</p>
+                <p th:unless="${filterType}">Todas las alertas ordenadas por prioridad</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="window.location.href='/alerts/urgent'">
+                    🔴 Ver Urgentes
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='/alerts/unviewed'">
+                    👁️ Ver No Vistas
+                </button>
+                <button class="btn btn-primary" onclick="markAllAsViewed()">
+                    ✓ Marcar Todas Vistas
+                </button>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Buscar alerta por vehículo, mensaje o tipo..." onkeyup="searchAlerts(this.value)">
+        </div>
+
+        <div class="table-container">
+            <table id="alertsTable">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Tipo</th>
+                        <th>Vehículo</th>
+                        <th>Mensaje</th>
+                        <th>Fecha</th>
+                        <th>KM</th>
+                        <th>Vista</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="alert : ${alerts}" 
+                        th:classappend="${!alert.viewed ? 'unviewed-row' : ''}"
+                        th:data-urgency="${alert.alertStatus.name() == 'VENCIDA' ? 'high' : 'normal'}"
+                        th:onclick="'markAlertAsViewed(' + ${alert.idAlert} + ')'"
+                        style="cursor: pointer;"
+                        title="Click para marcar como vista">
+                        
+                        <td>
+                            <span class="status-badge" 
+                                  th:classappend="${alert.alertStatus.name() == 'NOTIFICADA' ? 'pendiente' : 
+                                                   alert.alertStatus.name() == 'ATENDIDA' ? 'completado' : 'vencida'}"
+                                  th:text="${alert.alertStatus.name() == 'NOTIFICADA' ? 'NOTIFICADA' : 
+                                            alert.alertStatus.name() == 'ATENDIDA' ? 'ATENDIDA' : 'VENCIDA'}">NOTIFICADA</span>
+                        </td>
+                        
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${alert.alertType.name() == 'PREVENTIVA' ? 'badge-info' : 'badge-danger'}" 
+                                  th:text="${alert.alertType.name() == 'PREVENTIVA' ? 'PREVENTIVA' : 'CORRECTIVA'}">PREVENTIVA</span>
+                        </td>
+                        
+                        <td>
+                            <div class="vehicle-info">
+                                <strong th:text="${alert.maintenanceConfiguration.vehicle.plate}">ABC-123</strong>
+                                <small th:text="${alert.maintenanceConfiguration.vehicle.brand} + ' ' + ${alert.maintenanceConfiguration.vehicle.model}">Toyota Corolla</small>
+                            </div>
+                        </td>
+                        
+                        <td>
+                            <div class="alert-message">
+                                <strong th:if="${!alert.viewed}">🔔 </strong>
+                                <span th:text="${alert.message}">Mantenimiento próximo en 300 km</span>
+                            </div>
+                        </td>
+                        
+                        <td th:text="${#temporals.format(alert.alertDate, 'dd/MM/yyyy')}">27/11/2025</td>
+                        
+                        <td th:text="${alert.kmAlert != null ? #numbers.formatInteger(alert.kmAlert, 0, 'COMMA') + ' km' : '—'}">5,000 km</td>
+                        
+                        <td>
+                            <span th:if="${alert.viewed}" class="status-badge completado">✓ SÍ</span>
+                            <span th:unless="${alert.viewed}" class="status-badge pendiente">✗ NO</span>
+                        </td>
+                    </tr>
+                    
+                    <!-- Mensaje si no hay alertas -->
+                    <tr th:if="${#lists.isEmpty(alerts)}">
+                        <td colspan="7" style="text-align: center; padding: 60px 20px;">
+                            <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">✅</div>
+                            <h3 style="color: #10b981; margin-bottom: 8px;">¡Excelente! No hay alertas pendientes</h3>
+                            <p style="color: #6b7280;">Todos los mantenimientos están al día</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

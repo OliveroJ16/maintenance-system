@@ -6,7 +6,6 @@ spring:
     ansi:
       enabled: ALWAYS
 
-
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -25,14 +24,16 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Panama
 
-logging:
-  level:
-    root: INFO
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    com.maintenancesystem.maintenanceSystem: DEBUG
-  file:
-    name: logs/maintenance-system.log
+  jackson:
+    time-zone: America/Panama
+
+task:
+  scheduling:
+    pool:
+      size: 5
+    thread-name-prefix: scheduler-

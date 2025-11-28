@@ -26,7 +26,7 @@ public class MaintenanceController {
 
     @GetMapping
     public String maintenances(Model model) {
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
@@ -41,7 +41,7 @@ public class MaintenanceController {
     @PostMapping
     public String saveMaintenance(@ModelAttribute("newMaintenance") Maintenance maintenance, Model model) {
         maintenanceService.saveMaintenance(maintenance);
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
@@ -55,8 +55,8 @@ public class MaintenanceController {
     @PostMapping("/update/{id}")
     public String updateMaintenance(@ModelAttribute("newMaintenance") Maintenance maintenance,
                                     @PathVariable("id") Integer id, Model model) {
-        maintenanceService.updateMaintenance(maintenance, id);
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        maintenanceService.updateMaintenance(id, maintenance);
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
@@ -70,7 +70,7 @@ public class MaintenanceController {
     @GetMapping("/delete/{id}")
     public String deleteMaintenance(@PathVariable Integer id, Model model) {
         maintenanceService.deleteMaintenance(id);
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
         model.addAttribute("newMaintenanceType", new MaintenanceType());

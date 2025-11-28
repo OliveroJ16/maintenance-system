@@ -29,7 +29,7 @@ public class MaintenanceConfigController {
         model.addAttribute("configs", configService.getAllConfigurations());
         model.addAttribute("newConfig", new MaintenanceConfiguration());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
         model.addAttribute("vehicles", vehicleService.getAllVehicles());
@@ -45,7 +45,7 @@ public class MaintenanceConfigController {
         model.addAttribute("configs", configService.getAllConfigurations());
         model.addAttribute("newConfig", new MaintenanceConfiguration());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("newMaintenanceType", new MaintenanceType());  // ← FALTABA ESTE
         model.addAttribute("vehicles", vehicleService.getAllVehicles());
@@ -60,7 +60,7 @@ public class MaintenanceConfigController {
         model.addAttribute("configs", configService.getAllConfigurations());
         model.addAttribute("newConfig", new MaintenanceConfiguration());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
         model.addAttribute("vehicles", vehicleService.getAllVehicles());
@@ -73,7 +73,7 @@ public class MaintenanceConfigController {
         model.addAttribute("configs", configService.getAllConfigurations());
         model.addAttribute("newConfig", new MaintenanceConfiguration());
         model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenance());
+        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
         model.addAttribute("newMaintenance", new Maintenance());
         model.addAttribute("newMaintenanceType", new MaintenanceType());
         model.addAttribute("vehicles", vehicleService.getAllVehicles());

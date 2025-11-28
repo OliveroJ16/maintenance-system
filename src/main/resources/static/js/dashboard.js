@@ -48,4 +48,4 @@ window.addEventListener("click", function (event) {
 });
 
 
-loadSection("inicio");
+loadSection("alerts");
