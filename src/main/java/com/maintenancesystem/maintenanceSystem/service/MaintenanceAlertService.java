@@ -255,12 +255,12 @@ public class MaintenanceAlertService {
         if (optionalConfig.isPresent()) {
             alert.setMaintenanceConfiguration(optionalConfig.get());
             log.info("Configuración encontrada ID: {}", optionalConfig.get().getIdMaintenanceConfig());
-        } else {
-            // Si no hay configuración, asignar directamente vehículo y tipo
-            alert.setVehicle(maintenance.getVehicle());
-            alert.setMaintenanceType(maintenance.getMaintenanceType());
-            log.warn("No existe configuración. Creando alerta directa.");
         }
+
+        // Estas dos líneas deben ir SIEMPRE
+        alert.setVehicle(maintenance.getVehicle());
+        alert.setMaintenanceType(maintenance.getMaintenanceType());
+
 
         alert.setAlertType(AlertType.CORRECTIVA);
         alert.setAlertDate(maintenance.getMaintenanceDate());

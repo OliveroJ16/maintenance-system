@@ -50,6 +50,7 @@ public class AlertScheduler {
      * Se ejecuta a las 8:00, 12:00, 16:00, 20:00
      */
     @Scheduled(cron = "0 0 8,12,16,20 * * *")
+    //@Scheduled(cron = "*/10 * * * * *")
     public void checkAlertsFrequently() {
         log.info("Verificación frecuente de alertas...");
         try {
