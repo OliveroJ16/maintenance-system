@@ -46,4 +46,9 @@ public class DriverService {
         );
     }
 
+    public Driver getDriverById(Integer id) {
+        return driverRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Conductor no encontrado con id: " + id));
+    }
+
 }

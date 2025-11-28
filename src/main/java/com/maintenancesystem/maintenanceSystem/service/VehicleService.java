@@ -46,5 +46,10 @@ public class VehicleService {
                 vehicle.getVehicleType()
         );
     }
+
+    public Vehicle getVehicleById(Integer id) {
+        return vehicleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Vehículo no encontrado con id: " + id));
+    }
 }
 

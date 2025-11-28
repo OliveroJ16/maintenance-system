@@ -38,6 +38,7 @@
                         <th>Tipo</th>
                         <th>Kilometraje</th>
                         <th>Combustible</th>
+                        <th>Conductor Asignado</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -51,6 +52,17 @@
                         <td th:text="${v.vehicleType}"></td>
                         <td th:text="${v.mileage}"></td>
                         <td th:text="${v.fuelType}"></td>
+                        
+                        <td>
+                            <span th:if="${vehicleDrivers.containsKey(v.idVehicle)}" 
+                                  th:text="${vehicleDrivers.get(v.idVehicle)}"
+                                  class="driver-badge">
+                            </span>
+                            <span th:unless="${vehicleDrivers.containsKey(v.idVehicle)}" 
+                                  class="no-driver">
+                                Sin asignar
+                            </span>
+                        </td>
 
                         <td>
                             <span class="status-badge" 
@@ -63,7 +75,19 @@
                         <td>
                             <div class="action-buttons">
 
-                                <!-- boton editar-->
+                                <!-- Botón Asignar Conductor -->
+                                <button class="icon-btn assign"
+                                        onclick="openAssignModal(this)"
+                                        th:data-id="${v.idVehicle}"
+                                        th:data-plate="${v.plate}"
+                                        title="Asignar Conductor">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </button>
+
+                                <!-- Botón Editar -->
                                 <button class="icon-btn edit"
                                         onclick="editVehicle(this)"
                                         th:data-id="${v.idVehicle}"
@@ -85,7 +109,7 @@
                                     </svg>
                                 </button>
 
-                                <!-- boton eliminar -->
+                                <!-- Botón Eliminar -->
                                 <button class="icon-btn delete"
                                         th:onclick="'confirmDeleteVehicle(' + ${v.idVehicle} + ')'">
                                     <svg width="18" height="18" fill="none" stroke="currentColor"
@@ -107,6 +131,7 @@
     </div>
 </div>
 
+<!-- Modal Nuevo Vehículo -->
 <div id="vehicleModal" class="modal hidden">
     <div class="modal-content">
         <div class="modal-header">
@@ -114,7 +139,7 @@
             <button class="close-btn" onclick="closeVehicleModal()">&times;</button>
         </div>
 
-        <form id="vehicleForm" th:action="@{/vehiculos}"
+        <form id="vehicleForm" th:action="@{/vehicles}"
               th:object="${newVehicle}" method="post"
               onsubmit="saveVehicle(event)">
 
@@ -193,6 +218,7 @@
     </div>
 </div>
 
+<!-- Modal Editar Vehículo -->
 <div id="editVehicleModal" class="modal hidden">
     <div class="modal-content">
         <div class="modal-header">
@@ -272,6 +298,47 @@
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeEditVehicleModal()">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Actualizar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Asignar Conductor -->
+<div id="assignDriverModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Asignar Conductor</h3>
+            <button class="close-btn" onclick="closeAssignModal()">&times;</button>
+        </div>
+
+        <form id="assignDriverForm" onsubmit="assignVehicle(event)">
+
+            <input type="hidden" id="assignVehicleId" name="vehicleId">
+            
+            <div class="form-group">
+                <label>Vehículo</label>
+                <input type="text" id="assignVehiclePlate" readonly class="readonly-input">
+            </div>
+
+            <div class="form-group">
+                <label>Conductor</label>
+                <select id="assignDriverSelect" name="driverId" required>
+                    <option value="">Seleccione un conductor</option>
+                    <option th:each="d : ${drivers}" 
+                            th:value="${d.idDriver}"
+                            th:text="${d.firstName + ' ' + d.lastName + ' - ' + d.idCard}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de Asignación</label>
+                <input type="date" id="assignmentDate" name="assignmentDate" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Asignar</button>
             </div>
         </form>
     </div>

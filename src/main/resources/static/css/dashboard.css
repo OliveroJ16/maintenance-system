@@ -590,3 +590,54 @@ tr:hover {
 #editServiceModal {
     z-index: 920 !important; 
 }
+
+
+/* AJSUTRES PARA LA ASIGNACION DE VEHICULOS */
+.icon-btn.assign {
+    background-color: #10b981;
+    color: white;
+}
+
+.icon-btn.assign:hover {
+    background-color: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Input de solo lectura */
+.readonly-input {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    color: #6b7280;
+}
+
+/* Badge de conductor asignado */
+.driver-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.no-driver {
+    color: #9ca3af;
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
+/* Ajuste para 3 botones en acciones */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.action-buttons .icon-btn {
+    min-width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
