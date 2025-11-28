@@ -48,4 +48,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Integer> {
     @Query("SELECT v FROM Vehicle v WHERE v.status = :status")
     List<Vehicle> findByStatus(@Param("status") VehicleStatus status);
 
+    Vehicle findByPlate(String plate);
+
 }

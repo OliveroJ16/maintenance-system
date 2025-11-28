@@ -166,4 +166,7 @@ public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAle
         ORDER BY a.alertDate DESC
     """)
     List<MaintenanceAlert> findByVehicleId(Integer vehicleId);
+
+    List<MaintenanceAlert> findByAlertDateBetween(LocalDate startDate, LocalDate endDate);
+    List<MaintenanceAlert> findByViewed(Boolean viewed);
 }
