@@ -14,7 +14,8 @@ import java.util.List;
 public class MaintenanceService {
 
     private final MaintenanceRepository maintenanceRepository;
-    private final MaintenanceAlertService alertService; // ✅ Inyectar el servicio de alertas
+    private final MaintenanceAlertService alertService;
+    private final MaintenanceTypeService maintenanceTypeService;
 
     /**
      * Obtiene todos los mantenimientos
@@ -28,6 +29,11 @@ public class MaintenanceService {
      */
     @Transactional
     public void saveMaintenance(Maintenance maintenance) {
+        if (maintenance.getMaintenanceType() != null && maintenance.getMaintenanceType().getIdMaintenanceType() != null) {
+            maintenance.setMaintenanceType(
+                    maintenanceTypeService.getById(maintenance.getMaintenanceType().getIdMaintenanceType())
+            );
+        }
         // Guardar el mantenimiento
         Maintenance savedMaintenance = maintenanceRepository.save(maintenance);
 

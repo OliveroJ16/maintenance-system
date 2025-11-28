@@ -55,4 +55,38 @@ public class Maintenance {
 
     @Column(name = "fecha_creacion", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    // ========== MÉTODOS DE CONVENIENCIA ==========
+
+    /**
+     * Obtiene la fecha del mantenimiento (ejecutada o programada)
+     */
+    @Transient
+    public LocalDate getMaintenanceDate() {
+        return executionDate != null ? executionDate : scheduledDate;
+    }
+
+    /**
+     * Obtiene el kilometraje del mantenimiento (ejecutado o programado)
+     */
+    @Transient
+    public Integer getKilometers() {
+        return executionKm != null ? executionKm : scheduledKm;
+    }
+
+    /**
+     * Verifica si el mantenimiento fue ejecutado
+     */
+    @Transient
+    public boolean isExecuted() {
+        return executionDate != null;
+    }
+
+    /**
+     * Verifica si es un mantenimiento completado
+     */
+    @Transient
+    public boolean isCompleted() {
+        return status == MaintenanceStatus.COMPLETADO;
+    }
 }

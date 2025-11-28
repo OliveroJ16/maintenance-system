@@ -16,14 +16,16 @@ import java.util.List;
 public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAlert, Integer> {
 
     /**
-     * Obtiene todas las alertas ordenadas por estado (vencida > notificada > atendida)
-     * y luego por fecha
+     * Obtiene todas las alertas ordenadas por estado y fecha
+     * ACTUALIZADO: Maneja alertas con y sin configuración
      */
     @Query("""
         SELECT a FROM MaintenanceAlert a
         LEFT JOIN FETCH a.maintenanceConfiguration mc
-        LEFT JOIN FETCH mc.vehicle v
-        LEFT JOIN FETCH mc.maintenanceType mt
+        LEFT JOIN FETCH mc.vehicle v1
+        LEFT JOIN FETCH mc.maintenanceType mt1
+        LEFT JOIN FETCH a.vehicle v2
+        LEFT JOIN FETCH a.maintenanceType mt2
         ORDER BY 
             CASE a.alertStatus
                 WHEN 'VENCIDA' THEN 1
@@ -36,12 +38,15 @@ public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAle
 
     /**
      * Obtiene alertas urgentes (vencidas o próximas a vencer)
+     * ACTUALIZADO: Maneja alertas con y sin configuración
      */
     @Query("""
         SELECT a FROM MaintenanceAlert a
         LEFT JOIN FETCH a.maintenanceConfiguration mc
-        LEFT JOIN FETCH mc.vehicle v
-        LEFT JOIN FETCH mc.maintenanceType mt
+        LEFT JOIN FETCH mc.vehicle v1
+        LEFT JOIN FETCH mc.maintenanceType mt1
+        LEFT JOIN FETCH a.vehicle v2
+        LEFT JOIN FETCH a.maintenanceType mt2
         WHERE a.alertStatus = 'VENCIDA'
         OR (a.alertStatus = 'NOTIFICADA' AND a.alertDate BETWEEN :today AND :threshold)
         ORDER BY a.alertDate ASC
@@ -62,12 +67,15 @@ public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAle
 
     /**
      * Obtiene alertas no vistas
+     * ACTUALIZADO: Maneja alertas con y sin configuración
      */
     @Query("""
         SELECT a FROM MaintenanceAlert a
         LEFT JOIN FETCH a.maintenanceConfiguration mc
-        LEFT JOIN FETCH mc.vehicle v
-        LEFT JOIN FETCH mc.maintenanceType mt
+        LEFT JOIN FETCH mc.vehicle v1
+        LEFT JOIN FETCH mc.maintenanceType mt1
+        LEFT JOIN FETCH a.vehicle v2
+        LEFT JOIN FETCH a.maintenanceType mt2
         WHERE a.viewed = false
         ORDER BY a.alertDate ASC
     """)
@@ -80,12 +88,15 @@ public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAle
 
     /**
      * Obtiene alertas por tipo
+     * ACTUALIZADO: Maneja alertas con y sin configuración
      */
     @Query("""
         SELECT a FROM MaintenanceAlert a
         LEFT JOIN FETCH a.maintenanceConfiguration mc
-        LEFT JOIN FETCH mc.vehicle v
-        LEFT JOIN FETCH mc.maintenanceType mt
+        LEFT JOIN FETCH mc.vehicle v1
+        LEFT JOIN FETCH mc.maintenanceType mt1
+        LEFT JOIN FETCH a.vehicle v2
+        LEFT JOIN FETCH a.maintenanceType mt2
         WHERE a.alertType = :type
         ORDER BY a.alertDate ASC
     """)
@@ -93,12 +104,15 @@ public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAle
 
     /**
      * Obtiene alertas por estado
+     * ACTUALIZADO: Maneja alertas con y sin configuración
      */
     @Query("""
         SELECT a FROM MaintenanceAlert a
         LEFT JOIN FETCH a.maintenanceConfiguration mc
-        LEFT JOIN FETCH mc.vehicle v
-        LEFT JOIN FETCH mc.maintenanceType mt
+        LEFT JOIN FETCH mc.vehicle v1
+        LEFT JOIN FETCH mc.maintenanceType mt1
+        LEFT JOIN FETCH a.vehicle v2
+        LEFT JOIN FETCH a.maintenanceType mt2
         WHERE a.alertStatus = :status
         ORDER BY a.alertDate ASC
     """)
@@ -113,13 +127,12 @@ public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAle
      * Verifica si existe una alerta reciente para una configuración
      */
     @Query("""
-    SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
-    FROM MaintenanceAlert a
-    WHERE a.maintenanceConfiguration.idMaintenanceConfig = :configId
-    AND a.alertDate BETWEEN :startDate AND :endDate
-""")
+        SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
+        FROM MaintenanceAlert a
+        WHERE a.maintenanceConfiguration.idMaintenanceConfig = :configId
+        AND a.alertDate BETWEEN :startDate AND :endDate
+    """)
     boolean existsByConfigurationAndDateRange(Integer configId, LocalDate startDate, LocalDate endDate);
-
 
     /**
      * Marca todas las alertas como vistas
@@ -142,15 +155,15 @@ public interface MaintenanceAlertRepository extends JpaRepository<MaintenanceAle
 
     /**
      * Obtiene alertas de un vehículo específico
+     * ACTUALIZADO: Busca por configuración O por vehículo directo
      */
     @Query("""
-    SELECT a FROM MaintenanceAlert a
-    JOIN a.maintenanceConfiguration mc
-    JOIN mc.vehicle v
-    WHERE v.idVehicle = :vehicleId
-    ORDER BY a.alertDate DESC
-""")
+        SELECT a FROM MaintenanceAlert a
+        LEFT JOIN a.maintenanceConfiguration mc
+        LEFT JOIN mc.vehicle v1
+        LEFT JOIN a.vehicle v2
+        WHERE v1.idVehicle = :vehicleId OR v2.idVehicle = :vehicleId
+        ORDER BY a.alertDate DESC
+    """)
     List<MaintenanceAlert> findByVehicleId(Integer vehicleId);
-
-
 }

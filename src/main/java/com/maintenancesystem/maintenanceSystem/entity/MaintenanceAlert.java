@@ -39,6 +39,15 @@ public class MaintenanceAlert {
     private Boolean viewed = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_conf_mant", nullable = false, foreignKey = @ForeignKey(name = "fk_alerta_configuracion"))
+    @JoinColumn(name = "id_conf_mant", nullable = true, foreignKey = @ForeignKey(name = "fk_alerta_configuracion"))
     private MaintenanceConfiguration maintenanceConfiguration;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_vehiculo")
+    private Vehicle vehicle;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tipo_mant")
+    private MaintenanceType maintenanceType;
+
 }

@@ -1,3 +1,5 @@
+<!-- alerts.html -->
+
 <!-- DASHBOARD PRINCIPAL - Página de inicio del sistema -->
 <div class="header">
     <div class="header-left">
@@ -68,7 +70,7 @@
         </div>
     </div>
 
-    <!-- ALERTAS URGENTES (si existen) -->
+    <!-- ALERTAS URGENTES -->
     <div class="section-card urgent-section" th:if="${urgentAlerts != null && !#lists.isEmpty(urgentAlerts)}">
         <div class="section-header">
             <div class="section-title">
@@ -78,16 +80,17 @@
         </div>
         
         <div class="urgent-alerts-grid">
-            <div class="urgent-alert-card" th:each="urgent : ${urgentAlerts}">
+            <div class="urgent-alert-card" th:each="urgent : ${urgentAlerts}"
+                 th:with="vehicle=${urgent.maintenanceConfiguration != null ? urgent.maintenanceConfiguration.vehicle : urgent.vehicle}">
                 <div class="urgent-header">
-                    <span class="badge badge-danger" th:text="${urgent.alertType.name() == 'PREVENTIVA' ? 'PREVENTIVA' : 'CORRECTIVA'}">PREVENTIVA</span>
-                    <span class="vehicle-plate" th:text="${urgent.maintenanceConfiguration.vehicle.plate}">ABC-123</span>
+                    <span class="badge badge-danger" th:text="${urgent.alertType.name()}">CORRECTIVA</span>
+                    <span class="vehicle-plate" th:text="${vehicle.plate}">ABC-123</span>
                 </div>
                 <div class="urgent-body">
                     <p class="urgent-message" th:text="${urgent.message}">Mantenimiento vencido hace 5 días</p>
                     <div class="urgent-details">
                         <small th:text="'Fecha: ' + ${#temporals.format(urgent.alertDate, 'dd/MM/yyyy')}">Fecha: 22/11/2025</small>
-                        <small th:text="'Vehículo: ' + ${urgent.maintenanceConfiguration.vehicle.brand} + ' ' + ${urgent.maintenanceConfiguration.vehicle.model}">Toyota Corolla</small>
+                        <small th:text="'Vehículo: ' + ${vehicle.brand} + ' ' + ${vehicle.model}">Toyota Corolla</small>
                     </div>
                 </div>
                 <button class="btn btn-danger btn-sm" 
@@ -143,14 +146,14 @@
                         th:data-urgency="${alert.alertStatus.name() == 'VENCIDA' ? 'high' : 'normal'}"
                         th:onclick="'markAlertAsViewed(' + ${alert.idAlert} + ')'"
                         style="cursor: pointer;"
-                        title="Click para marcar como vista">
+                        title="Click para marcar como vista"
+                        th:with="vehicle=${alert.maintenanceConfiguration != null ? alert.maintenanceConfiguration.vehicle : alert.vehicle}">
                         
                         <td>
                             <span class="status-badge" 
                                   th:classappend="${alert.alertStatus.name() == 'NOTIFICADA' ? 'pendiente' : 
                                                    alert.alertStatus.name() == 'ATENDIDA' ? 'completado' : 'vencida'}"
-                                  th:text="${alert.alertStatus.name() == 'NOTIFICADA' ? 'NOTIFICADA' : 
-                                            alert.alertStatus.name() == 'ATENDIDA' ? 'ATENDIDA' : 'VENCIDA'}">NOTIFICADA</span>
+                                  th:text="${alert.alertStatus.name()}">NOTIFICADA</span>
                         </td>
                         
                         <td>
@@ -161,8 +164,8 @@
                         
                         <td>
                             <div class="vehicle-info">
-                                <strong th:text="${alert.maintenanceConfiguration.vehicle.plate}">ABC-123</strong>
-                                <small th:text="${alert.maintenanceConfiguration.vehicle.brand} + ' ' + ${alert.maintenanceConfiguration.vehicle.model}">Toyota Corolla</small>
+                                <strong th:text="${vehicle.plate}">ABC-123</strong>
+                                <small th:text="${vehicle.brand + ' ' + vehicle.model}">Toyota Corolla</small>
                             </div>
                         </td>
                         

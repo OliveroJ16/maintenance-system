@@ -7,10 +7,13 @@ import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
 import com.maintenancesystem.maintenanceSystem.enums.AlertStatus;
 import com.maintenancesystem.maintenanceSystem.enums.AlertType;
 import com.maintenancesystem.maintenanceSystem.enums.VehicleStatus;
+import com.maintenancesystem.maintenanceSystem.enums.MaintenanceCategory;
 import com.maintenancesystem.maintenanceSystem.repository.MaintenanceAlertRepository;
 import com.maintenancesystem.maintenanceSystem.repository.MaintenanceConfigurationRepository;
 import com.maintenancesystem.maintenanceSystem.repository.VehicleRepository;
+import com.maintenancesystem.maintenanceSystem.repository.MaintenanceRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +26,13 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MaintenanceAlertService {
 
     private final MaintenanceAlertRepository alertRepository;
     private final MaintenanceConfigurationRepository configRepository;
     private final VehicleRepository vehicleRepository;
+    private final MaintenanceRepository maintenanceRepository;
 
     /**
      * Obtiene todas las alertas ordenadas por prioridad
@@ -123,21 +128,28 @@ public class MaintenanceAlertService {
      */
     @Transactional
     public void generatePreventiveAlerts() {
+        log.info("Iniciando generación de alertas preventivas...");
         List<Vehicle> activeVehicles = vehicleRepository.findByStatus(VehicleStatus.ACTIVO);
+        int alertsGenerated = 0;
 
         for (Vehicle vehicle : activeVehicles) {
             List<MaintenanceConfiguration> configs = configRepository.findByVehicleId(vehicle.getIdVehicle());
 
             for (MaintenanceConfiguration config : configs) {
-                checkAndGenerateAlert(vehicle, config);
+                if (checkAndGenerateAlert(vehicle, config)) {
+                    alertsGenerated++;
+                }
             }
         }
+
+        log.info("Alertas preventivas generadas: {}", alertsGenerated);
     }
 
     /**
      * Verifica si se debe generar una alerta para una configuración específica
+     * RETORNA true si se generó una alerta
      */
-    private void checkAndGenerateAlert(Vehicle vehicle, MaintenanceConfiguration config) {
+    private boolean checkAndGenerateAlert(Vehicle vehicle, MaintenanceConfiguration config) {
         LocalDate today = LocalDate.now();
         Integer currentKm = vehicle.getMileage();
 
@@ -196,50 +208,79 @@ public class MaintenanceAlertService {
 
         // Crear alerta si es necesario y no existe una similar reciente
         if (shouldAlert && !existsRecentAlert(config, today)) {
-            createAlert(config, AlertType.PREVENTIVA, today, alertKm, message);
+            createPreventiveAlert(config, today, alertKm, message);
+            log.debug("Alerta preventiva creada: {}", message);
+            return true;
         }
+
+        return false;
     }
 
     /**
      * Genera alerta correctiva cuando se registra un mantenimiento correctivo
+     * MÉTODO PRINCIPAL PARA MANTENIMIENTOS CORRECTIVOS
      */
     @Transactional
     public void generateCorrectiveAlert(Maintenance maintenance) {
+        log.info("=== Generando alerta correctiva para mantenimiento ID: {} ===",
+                maintenance.getIdMaintenance());
 
+        // Validar que sea un mantenimiento correctivo
+        if (maintenance.getMaintenanceType().getCategory() != MaintenanceCategory.CORRECTIVO) {
+            log.warn("El mantenimiento no es correctivo. Categoría: {}",
+                    maintenance.getMaintenanceType().getCategory());
+            return;
+        }
+
+        // Buscar configuración (puede no existir)
         Optional<MaintenanceConfiguration> optionalConfig =
                 configRepository.findByVehicleAndMaintenanceType(
                         maintenance.getVehicle(),
                         maintenance.getMaintenanceType()
                 );
 
-        if (optionalConfig.isEmpty()) {
-            return; // No tiene configuración → no se crea alerta
-        }
-
-        MaintenanceConfiguration config = optionalConfig.get();
-
         String message = String.format(
-                "Mantenimiento correctivo requerido: %s. Vehículo: %s - %s",
+                "🔧 Mantenimiento correctivo requerido: %s - Vehículo: %s (%s %s)%s",
                 maintenance.getMaintenanceType().getTypeName(),
                 maintenance.getVehicle().getPlate(),
-                maintenance.getDescription() != null ? maintenance.getDescription() : "Sin descripción"
+                maintenance.getVehicle().getBrand(),
+                maintenance.getVehicle().getModel(),
+                maintenance.getDescription() != null ? " - " + maintenance.getDescription() : ""
         );
 
-        createAlert(config, AlertType.CORRECTIVA, LocalDate.now(),
-                maintenance.getVehicle().getMileage(),
-                message
-        );
+        // Crear alerta correctiva
+        MaintenanceAlert alert = new MaintenanceAlert();
+
+        // Asignar configuración si existe
+        if (optionalConfig.isPresent()) {
+            alert.setMaintenanceConfiguration(optionalConfig.get());
+            log.info("Configuración encontrada ID: {}", optionalConfig.get().getIdMaintenanceConfig());
+        } else {
+            // Si no hay configuración, asignar directamente vehículo y tipo
+            alert.setVehicle(maintenance.getVehicle());
+            alert.setMaintenanceType(maintenance.getMaintenanceType());
+            log.warn("No existe configuración. Creando alerta directa.");
+        }
+
+        alert.setAlertType(AlertType.CORRECTIVA);
+        alert.setAlertDate(maintenance.getMaintenanceDate());
+        alert.setKmAlert(maintenance.getKilometers());
+        alert.setAlertStatus(AlertStatus.NOTIFICADA);
+        alert.setMessage(message);
+        alert.setViewed(false);
+
+        alertRepository.save(alert);
+        log.info("✓ Alerta correctiva creada exitosamente: {}", message);
     }
 
-
     /**
-     * Crea una nueva alerta
+     * Crea una nueva alerta preventiva
      */
-    private void createAlert(MaintenanceConfiguration config, AlertType type,
-                             LocalDate date, Integer km, String message) {
+    private void createPreventiveAlert(MaintenanceConfiguration config, LocalDate date,
+                                       Integer km, String message) {
         MaintenanceAlert alert = new MaintenanceAlert();
         alert.setMaintenanceConfiguration(config);
-        alert.setAlertType(type);
+        alert.setAlertType(AlertType.PREVENTIVA);
         alert.setAlertDate(date);
         alert.setKmAlert(km);
         alert.setAlertStatus(AlertStatus.NOTIFICADA);
@@ -267,20 +308,47 @@ public class MaintenanceAlertService {
     }
 
     /**
-     * Obtiene el kilometraje del último mantenimiento
+     * Obtiene el kilometraje del último mantenimiento COMPLETADO
+     * CORREGIDO: Usa los métodos @Transient de la entidad
      */
     private Integer getLastMaintenanceKm(Vehicle vehicle, MaintenanceConfiguration config) {
-        // Aquí deberías consultar la tabla de mantenimientos
-        // Por defecto, usar el kilometraje de adquisición o 0
-        return vehicle.getAcquisitionDate() != null ? 0 : vehicle.getMileage();
+        Optional<Maintenance> lastMaintenance = maintenanceRepository
+                .findLastMaintenanceByVehicleAndType(
+                        vehicle.getIdVehicle(),
+                        config.getMaintenanceType().getIdMaintenanceType()
+                );
+
+        if (lastMaintenance.isPresent() && lastMaintenance.get().isCompleted()) {
+            Integer km = lastMaintenance.get().getKilometers();
+            log.debug("Último mantenimiento completado en {} km", km);
+            return km;
+        }
+
+        // Si no hay mantenimientos previos, usar el kilometraje actual del vehículo
+        log.debug("No se encontró mantenimiento completado. Usando kilometraje actual: {}",
+                vehicle.getMileage());
+        return vehicle.getMileage() != null ? vehicle.getMileage() : 0;
     }
 
     /**
-     * Obtiene la fecha del último mantenimiento
+     * Obtiene la fecha del último mantenimiento COMPLETADO
+     * CORREGIDO: Usa los métodos @Transient de la entidad
      */
     private LocalDate getLastMaintenanceDate(Vehicle vehicle, MaintenanceConfiguration config) {
-        // Aquí deberías consultar la tabla de mantenimientos
-        // Por defecto, usar la fecha de adquisición
+        Optional<Maintenance> lastMaintenance = maintenanceRepository
+                .findLastMaintenanceByVehicleAndType(
+                        vehicle.getIdVehicle(),
+                        config.getMaintenanceType().getIdMaintenanceType()
+                );
+
+        if (lastMaintenance.isPresent() && lastMaintenance.get().isCompleted()) {
+            LocalDate date = lastMaintenance.get().getMaintenanceDate();
+            log.debug("Último mantenimiento completado en fecha: {}", date);
+            return date;
+        }
+
+        // Si no hay mantenimientos previos, usar la fecha de adquisición del vehículo
+        log.debug("No se encontró mantenimiento completado. Usando fecha de adquisición.");
         return vehicle.getAcquisitionDate() != null ?
                 vehicle.getAcquisitionDate() : LocalDate.now();
     }
@@ -293,5 +361,6 @@ public class MaintenanceAlertService {
     public void updateExpiredAlerts() {
         LocalDate today = LocalDate.now();
         alertRepository.updateExpiredAlerts(today);
+        log.info("Alertas vencidas actualizadas");
     }
 }

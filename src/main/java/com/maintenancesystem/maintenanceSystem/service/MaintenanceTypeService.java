@@ -40,4 +40,10 @@ public class MaintenanceTypeService {
                 maintenanceType.getPriority()
         );
     }
+
+    public MaintenanceType getById(Integer id) {
+        return maintenanceTypeRespository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de mantenimiento no encontrado con ID: " + id));
+    }
+
 }
