@@ -31,7 +31,7 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rol", columnDefinition = "ENUM('administrador','supervisor') NOT NULL")
+    @Column(name = "rol", columnDefinition = "ENUM('ADMINISTRADOR','SUPERVISOR') NOT NULL")
     private Role role;
 
     @Column(name = "email", length = 100)

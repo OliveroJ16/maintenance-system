@@ -1,5 +1,7 @@
 package com.maintenancesystem.maintenanceSystem.config;
 
+
+import com.maintenancesystem.maintenanceSystem.security.CustomAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -22,12 +26,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/login", "/error").permitAll()
+                        .requestMatchers("/dashboard").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/supervisor/**").hasRole("SUPERVISOR")
+                        .requestMatchers("/vehicles/**", "/maintenance/**").hasAnyRole("ADMINISTRADOR", "SUPERVISOR")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler(customAuthenticationSuccessHandler)
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
@@ -50,5 +57,6 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
+
 
 
