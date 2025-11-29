@@ -1,0 +1,120 @@
+<div class="header">
+    <div class="header-left">
+        <h1 id="pageTitle">Dashboard Supervisor</h1>
+        <p id="pageDescription">Vista general del estado de la flota</p>
+    </div>
+</div>
+
+<div class="content-area">
+    <!-- Tarjetas de Estadísticas -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        
+        <!-- Vehículos Activos -->
+        <div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <p style="opacity: 0.9; margin: 0 0 8px 0; font-size: 14px;">Vehículos Activos</p>
+                    <h2 style="margin: 0; font-size: 36px; font-weight: 700;" th:text="${activeVehiclesCount}">0</h2>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px;">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas Pendientes -->
+        <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <p style="opacity: 0.9; margin: 0 0 8px 0; font-size: 14px;">Alertas Pendientes</p>
+                    <h2 style="margin: 0; font-size: 36px; font-weight: 700;" th:text="${pendingAlertsCount}">0</h2>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px;">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mantenimientos en Proceso -->
+        <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <p style="opacity: 0.9; margin: 0 0 8px 0; font-size: 14px;">En Mantenimiento</p>
+                    <h2 style="margin: 0; font-size: 36px; font-weight: 700;" th:text="${ongoingMaintenancesCount}">0</h2>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px;">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Alertas Recientes -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Alertas Recientes</h2>
+                <p>Últimas notificaciones de mantenimiento</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Vehículo</th>
+                        <th>Mensaje</th>
+                        <th>Fecha</th>
+                        <th>Kilometraje</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="alert : ${recentAlerts}">
+                        <td>
+                            <span class="status-badge" 
+                                  th:classappend="${alert.alertType.name() == 'PREVENTIVA'} ? 'activo' : 'inactivo'"
+                                  th:text="${alert.alertType}">
+                            </span>
+                        </td>
+                        <td>
+                            <strong th:text="${alert.vehicle.plate}">ABC-123</strong>
+                            <br>
+                            <small th:text="${alert.vehicle.brand + ' ' + alert.vehicle.model}"></small>
+                        </td>
+                        <td th:text="${alert.message}">Mensaje de alerta</td>
+                        <td th:text="${#temporals.format(alert.alertDate, 'dd/MM/yyyy')}">01/01/2025</td>
+                        <td th:text="${alert.kmAlert != null ? alert.kmAlert + ' km' : '—'}">10000 km</td>
+                        <td>
+                            <span class="status-badge"
+                                  th:classappend="${alert.alertStatus.name() == 'NOTIFICADA'} ? 'activo' : 'inactivo'"
+                                  th:text="${alert.alertStatus}">
+                            </span>
+                        </td>
+                    </tr>
+                    <tr th:if="${recentAlerts.isEmpty()}">
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">
+                            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 10px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <br>
+                            No hay alertas pendientes
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
