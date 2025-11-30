@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -25,19 +26,29 @@ public class VehicleAssignmentController {
     private final DriverService driverService;
     private final VehicleService vehicleService;
 
-    // ----------------------------
-    // Construir mapa vehículo → conductores
-    // ----------------------------
+    /**
+     * Construye un mapa con UN SOLO conductor por vehículo
+     */
     private Map<Integer, String> buildVehicleDrivers() {
         Map<Integer, String> map = new HashMap<>();
 
         assignmentService.getAllAssignments().forEach(a -> {
             Integer vId = a.getId().getVehicleId();
             String name = a.getDriver().getFirstName() + " " + a.getDriver().getLastName();
-            map.merge(vId, name, (oldVal, newVal) -> oldVal + ", " + newVal);
+            map.put(vId, name);
         });
 
         return map;
+    }
+
+    /**
+     * Obtiene la asignación actual de un vehículo (si existe)
+     */
+    private VehicleAssignment getCurrentAssignment(Integer vehicleId) {
+        return assignmentService.getAllAssignments().stream()
+                .filter(a -> a.getId().getVehicleId().equals(vehicleId))
+                .findFirst()
+                .orElse(null);
     }
 
     // ----------------------------
@@ -51,7 +62,7 @@ public class VehicleAssignmentController {
     }
 
     // ----------------------------
-    // Asignar conductor a vehículo
+    // Asignar o Reasignar conductor automáticamente
     // ----------------------------
     @PostMapping("/assign")
     public String assignVehicle(@RequestParam Integer vehicleId,
@@ -60,6 +71,15 @@ public class VehicleAssignmentController {
                                 Model model) {
 
         try {
+            // Obtener asignación actual si existe
+            VehicleAssignment currentAssignment = getCurrentAssignment(vehicleId);
+
+            // Si ya tiene conductor, eliminar la asignación anterior
+            if (currentAssignment != null) {
+                assignmentService.deleteAssignment(currentAssignment.getId());
+            }
+
+            // Crear nueva asignación
             Vehicle vehicle = vehicleService.getVehicleById(vehicleId);
             Driver driver = driverService.getDriverById(driverId);
 
@@ -75,7 +95,9 @@ public class VehicleAssignmentController {
 
             assignmentService.saveAssignment(assignment);
 
-            model.addAttribute("success", "Conductor asignado correctamente.");
+            model.addAttribute("success",
+                    currentAssignment != null ? "Conductor reasignado correctamente." : "Conductor asignado correctamente.");
+
         } catch (Exception e) {
             model.addAttribute("error", "Error al asignar conductor: " + e.getMessage());
         }
@@ -85,12 +107,33 @@ public class VehicleAssignmentController {
     }
 
     // ----------------------------
-    // Eliminar asignación
+    // Eliminar asignación (sin reasignar)
+    // ----------------------------
+    @PostMapping("/delete")
+    @ResponseBody
+    public String deleteAssignment(@RequestParam Integer vehicleId) {
+        try {
+            VehicleAssignment currentAssignment = getCurrentAssignment(vehicleId);
+
+            if (currentAssignment != null) {
+                assignmentService.deleteAssignment(currentAssignment.getId());
+                return "success";
+            }
+            return "not_found";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error";
+        }
+    }
+
+    // ----------------------------
+    // Endpoint antiguo mantenido por compatibilidad
     // ----------------------------
     @GetMapping("/delete/{vehicleId}/{driverId}")
-    public String deleteAssignment(@PathVariable Integer vehicleId,
-                                   @PathVariable Integer driverId,
-                                   Model model) {
+    public String deleteAssignmentOld(@PathVariable Integer vehicleId,
+                                      @PathVariable Integer driverId,
+                                      Model model) {
 
         try {
             VehicleAssignmentId id = new VehicleAssignmentId(driverId, vehicleId);

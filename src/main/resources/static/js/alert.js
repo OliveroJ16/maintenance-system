@@ -1,6 +1,8 @@
-// alerts.js - Gestión de alertas (SOLO VISUALIZACIÓN - No CRUD completo)
+// alerts.js - Gestión completa de alertas
 
-// Función para marcar alerta como vista
+// ============================================
+// MARCAR ALERTA COMO VISTA
+// ============================================
 window.markAlertAsViewed = async function(id) {
     try {
         const response = await fetch(`/alerts/mark-viewed/${id}`, {
@@ -38,7 +40,9 @@ window.markAlertAsViewed = async function(id) {
     }
 };
 
-// Función para marcar todas las alertas como vistas
+// ============================================
+// MARCAR TODAS LAS ALERTAS COMO VISTAS
+// ============================================
 window.markAllAsViewed = async function() {
     Swal.fire({
         title: '¿Marcar todas como vistas?',
@@ -87,7 +91,110 @@ window.markAllAsViewed = async function() {
     });
 };
 
-// Función para actualizar el estado de una alerta
+// ============================================
+// ABRIR MODAL PARA ATENDER ALERTA
+// ============================================
+window.openAttendModal = function(button) {
+    const alertId = button.getAttribute('data-alert-id');
+    const vehiclePlate = button.getAttribute('data-vehicle-plate');
+    const vehicleKm = button.getAttribute('data-vehicle-km');
+
+    document.getElementById('attendAlertId').value = alertId;
+    document.getElementById('attendVehiclePlate').value = vehiclePlate;
+    document.getElementById('attendExecutionKm').value = vehicleKm;
+    
+    // Mostrar hint con el km actual
+    document.getElementById('kmHint').textContent = `Kilometraje actual del vehículo: ${vehicleKm} km`;
+
+    // Fecha actual por defecto
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('attendExecutionDate').value = today;
+
+    document.getElementById('attendAlertModal').classList.remove('hidden');
+};
+
+// Función alternativa que recibe parámetros directamente (para Thymeleaf)
+window.openAttendModalById = function(alertId, vehiclePlate, vehicleKm) {
+    document.getElementById('attendAlertId').value = alertId;
+    document.getElementById('attendVehiclePlate').value = vehiclePlate;
+    document.getElementById('attendExecutionKm').value = vehicleKm;
+    
+    // Mostrar hint con el km actual
+    document.getElementById('kmHint').textContent = `Kilometraje actual del vehículo: ${vehicleKm} km`;
+
+    // Fecha actual por defecto
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('attendExecutionDate').value = today;
+
+    document.getElementById('attendAlertModal').classList.remove('hidden');
+};
+
+window.closeAttendModal = function() {
+    document.getElementById('attendAlertModal').classList.add('hidden');
+    document.getElementById('attendAlertForm').reset();
+};
+
+// Cerrar modal al hacer clic fuera
+window.onclick = function(event) {
+    const modal = document.getElementById('attendAlertModal');
+    if (event.target === modal) {
+        closeAttendModal();
+    }
+};
+
+// ============================================
+// ATENDER ALERTA (REGISTRAR MANTENIMIENTO)
+// ============================================
+window.attendAlert = async function(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('attendAlertForm');
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('/alerts/attend', {
+            method: 'POST',
+            body: formData
+        });
+
+        const text = await response.text();
+
+        if (response.ok && text === 'success') {
+            closeAttendModal();
+            
+            Swal.fire({
+                title: '¡Mantenimiento Registrado!',
+                text: 'La alerta ha sido marcada como atendida',
+                icon: 'success',
+                confirmButtonColor: '#6366f1'
+            });
+
+            setTimeout(() => {
+                if (typeof loadSection === 'function') {
+                    loadSection('alerts');
+                } else {
+                    window.location.reload();
+                }
+            }, 1000);
+
+        } else {
+            throw new Error(text);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo registrar el mantenimiento: ' + error.message,
+            confirmButtonColor: '#6366f1'
+        });
+    }
+};
+
+// ============================================
+// ACTUALIZAR ESTADO DE ALERTA
+// ============================================
 window.updateAlertStatus = async function(id, newStatus) {
     try {
         const response = await fetch(`/alerts/update-status/${id}?status=${newStatus}`, {
@@ -125,7 +232,9 @@ window.updateAlertStatus = async function(id, newStatus) {
     }
 };
 
-// Función para buscar/filtrar alertas
+// ============================================
+// BUSCAR/FILTRAR ALERTAS
+// ============================================
 window.searchAlerts = function(value) {
     const normalize = (str) =>
         str.normalize("NFD")
@@ -141,26 +250,9 @@ window.searchAlerts = function(value) {
     });
 };
 
-// Función para obtener clase de badge según el estado
-window.getStatusBadgeClass = function(status) {
-    const statusClasses = {
-        'NOTIFICADA': 'pendiente',
-        'ATENDIDA': 'completado',
-        'VENCIDA': 'vencida'
-    };
-    return statusClasses[status] || 'pendiente';
-};
-
-// Función para obtener clase de badge según el tipo
-window.getTypeBadgeClass = function(type) {
-    const typeClasses = {
-        'PREVENTIVA': 'badge-info',
-        'CORRECTIVA': 'badge-danger'
-    };
-    return typeClasses[type] || 'badge-secondary';
-};
-
-// Función de utilidad para generar alertas manualmente (solo para testing/admin)
+// ============================================
+// FUNCIONES DE UTILIDAD (ADMIN/TESTING)
+// ============================================
 window.generatePreventiveAlerts = async function() {
     Swal.fire({
         title: 'Generar alertas preventivas',

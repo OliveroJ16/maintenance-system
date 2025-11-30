@@ -1,13 +1,7 @@
 package com.maintenancesystem.maintenanceSystem.service;
 
-import com.maintenancesystem.maintenanceSystem.entity.MaintenanceAlert;
-import com.maintenancesystem.maintenanceSystem.entity.MaintenanceConfiguration;
-import com.maintenancesystem.maintenanceSystem.entity.Vehicle;
-import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
-import com.maintenancesystem.maintenanceSystem.enums.AlertStatus;
-import com.maintenancesystem.maintenanceSystem.enums.AlertType;
-import com.maintenancesystem.maintenanceSystem.enums.VehicleStatus;
-import com.maintenancesystem.maintenanceSystem.enums.MaintenanceCategory;
+import com.maintenancesystem.maintenanceSystem.entity.*;
+import com.maintenancesystem.maintenanceSystem.enums.*;
 import com.maintenancesystem.maintenanceSystem.repository.MaintenanceAlertRepository;
 import com.maintenancesystem.maintenanceSystem.repository.MaintenanceConfigurationRepository;
 import com.maintenancesystem.maintenanceSystem.repository.VehicleRepository;
@@ -362,5 +356,92 @@ public class MaintenanceAlertService {
         LocalDate today = LocalDate.now();
         alertRepository.updateExpiredAlerts(today);
         log.info("Alertas vencidas actualizadas");
+    }
+
+    /**
+     * Atiende una alerta - Marca como atendida y crea/actualiza el registro de mantenimiento
+     *
+     * @param alertId ID de la alerta
+     * @param executionKm Kilometraje en el que se realizó el mantenimiento
+     * @param executionDate Fecha en la que se realizó el mantenimiento (formato: yyyy-MM-dd)
+     * @param notes Notas opcionales del mantenimiento
+     */
+    @Transactional
+    public void attendAlert(Integer alertId, Integer executionKm, String executionDate, String notes) {
+        // 1. Buscar la alerta
+        MaintenanceAlert alert = alertRepository.findById(alertId)
+                .orElseThrow(() -> new RuntimeException("Alerta no encontrada"));
+
+        // 2. Marcar alerta como ATENDIDA y vista
+        alert.setAlertStatus(AlertStatus.ATENDIDA);
+        alert.setViewed(true);
+        alertRepository.save(alert);
+
+        // 3. Buscar si ya existe un mantenimiento relacionado
+        // Buscar por vehículo, tipo de mantenimiento y estado PENDIENTE o EN_PROCESO
+        Vehicle vehicle = alert.getVehicle();
+        MaintenanceType maintenanceType = alert.getMaintenanceType();
+
+        if (vehicle == null || maintenanceType == null) {
+            throw new RuntimeException("La alerta no tiene vehículo o tipo de mantenimiento asociado");
+        }
+
+        // Buscar mantenimiento pendiente relacionado
+        List<Maintenance> pendingMaintenances = maintenanceRepository
+                .findByVehicleAndMaintenanceTypeAndStatus(
+                        vehicle,
+                        maintenanceType,
+                        MaintenanceStatus.PENDIENTE
+                );
+
+        Maintenance maintenance;
+
+        if (!pendingMaintenances.isEmpty()) {
+            // 4a. Si existe un mantenimiento pendiente, actualizarlo
+            maintenance = pendingMaintenances.get(0);
+            maintenance.setExecutionDate(LocalDate.parse(executionDate));
+            maintenance.setExecutionKm(executionKm);
+            maintenance.setStatus(MaintenanceStatus.COMPLETADO);
+
+            // Agregar notas a la descripción existente
+            if (notes != null && !notes.trim().isEmpty()) {
+                String currentDesc = maintenance.getDescription() != null ? maintenance.getDescription() : "";
+                maintenance.setDescription(currentDesc + "\n[Ejecución]: " + notes);
+            }
+
+        } else {
+            // 4b. Si no existe, crear un nuevo registro de mantenimiento
+            maintenance = new Maintenance();
+            maintenance.setVehicle(vehicle);
+            maintenance.setMaintenanceType(maintenanceType);
+
+            // Datos programados (de la alerta)
+            maintenance.setScheduledDate(alert.getAlertDate());
+            maintenance.setScheduledKm(alert.getKmAlert() != null ? alert.getKmAlert() : vehicle.getMileage());
+
+            // Datos de ejecución
+            maintenance.setExecutionDate(LocalDate.parse(executionDate));
+            maintenance.setExecutionKm(executionKm);
+            maintenance.setStatus(MaintenanceStatus.COMPLETADO);
+
+            // Descripción
+            String description = "Mantenimiento realizado por alerta " + alert.getAlertType().name();
+            if (notes != null && !notes.trim().isEmpty()) {
+                description += "\n" + notes;
+            }
+            maintenance.setDescription(description);
+
+            // Workshop puede ser null si no se especifica
+            maintenance.setWorkshop(null);
+        }
+
+        // 5. Guardar el mantenimiento
+        maintenanceRepository.save(maintenance);
+
+        // 6. Actualizar el kilometraje del vehículo si es mayor
+        if (executionKm > vehicle.getMileage()) {
+            vehicle.setMileage(executionKm);
+            vehicleRepository.save(vehicle);
+        }
     }
 }

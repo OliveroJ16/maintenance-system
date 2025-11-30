@@ -1,4 +1,4 @@
-// users.js - Ahora solo configuración
+// users.js - Ahora con manejo de driver ID
 const usersManager = new CRUDManager({
     entity: 'users',
     entityName: 'usuario',
@@ -23,8 +23,18 @@ window.editUser = function(button) {
         firstName: button.getAttribute('data-firstname'),
         lastName: button.getAttribute('data-lastname'),
         role: button.getAttribute('data-role'),
-        email: button.getAttribute('data-email'),
-        driver: button.getAttribute('data-driver')
+        email: button.getAttribute('data-email')
     };
+    
     usersManager.openEditModal(userData);
+    
+    // Seleccionar el driver en el select después de abrir el modal
+    const driverId = button.getAttribute('data-driver-id');
+    const driverSelect = document.querySelector('#editUserForm select[name="driver.idDriver"]');
+    
+    if (driverSelect && driverId) {
+        driverSelect.value = driverId;
+    } else if (driverSelect) {
+        driverSelect.value = '';
+    }
 };

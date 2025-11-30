@@ -1,6 +1,9 @@
 package com.maintenancesystem.maintenanceSystem.repository;
 
 import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
+import com.maintenancesystem.maintenanceSystem.entity.MaintenanceType;
+import com.maintenancesystem.maintenanceSystem.entity.Vehicle;
+import com.maintenancesystem.maintenanceSystem.enums.MaintenanceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +31,22 @@ public interface MaintenanceRepository extends JpaRepository<Maintenance, Intege
     List<Maintenance> findByScheduledDateBetween(LocalDate startDate, LocalDate endDate);
     List<Maintenance> findByStatus(String status);
 
+    /**
+     * Busca mantenimientos por vehículo, tipo y estado
+     */
+    List<Maintenance> findByVehicleAndMaintenanceTypeAndStatus(
+            Vehicle vehicle,
+            MaintenanceType maintenanceType,
+            MaintenanceStatus status
+    );
+
+    /**
+     * Busca mantenimientos por vehículo y estado
+     */
+    List<Maintenance> findByVehicleAndStatus(Vehicle vehicle, MaintenanceStatus status);
+
+    /**
+     * Busca mantenimientos por estado
+     */
+    List<Maintenance> findByStatus(MaintenanceStatus status);
 }

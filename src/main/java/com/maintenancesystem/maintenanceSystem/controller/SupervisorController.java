@@ -33,35 +33,32 @@ public class SupervisorController {
         return "supervisor_dashboard";
     }
 
-    // ============================================
-    // SECCIÓN: Dashboard (estadísticas)
-    // ============================================
     @GetMapping("/dashboard-section")
     public String dashboardSection(Model model) {
         // Vehículos activos
         List<Vehicle> activeVehicles = vehicleService.getAllVehicles()
                 .stream()
                 .filter(v -> v.getStatus() == VehicleStatus.ACTIVO)
-                .collect(Collectors.toList());
+                .toList();
 
-        // Alertas pendientes
+        // Alertas pendientes - FILTRAR LAS QUE TIENEN VEHICLE NULL
         List<MaintenanceAlert> pendingAlerts = alertService.getAllAlerts()
                 .stream()
+                .filter(a -> a.getVehicle() != null)  // ← SOLO ESTA LÍNEA
                 .filter(a -> a.getAlertStatus() == AlertStatus.NOTIFICADA)
-                .collect(Collectors.toList());
+                .toList();
 
         // Mantenimientos en proceso
         List<Maintenance> ongoingMaintenances = maintenanceService.getAllMaintenances()
                 .stream()
                 .filter(m -> m.getStatus() == MaintenanceStatus.EN_PROCESO)
-                .collect(Collectors.toList());
+                .toList();
 
         model.addAttribute("activeVehiclesCount", activeVehicles.size());
         model.addAttribute("pendingAlertsCount", pendingAlerts.size());
         model.addAttribute("ongoingMaintenancesCount", ongoingMaintenances.size());
         model.addAttribute("recentAlerts", pendingAlerts.stream().limit(5).collect(Collectors.toList()));
 
-        // Devuelve SOLO el fragmento HTML, sin layout
         return "supervisor_dashboard_section";
     }
 
@@ -77,7 +74,6 @@ public class SupervisorController {
 
         model.addAttribute("vehicles", activeVehicles);
 
-        // Devuelve SOLO el fragmento HTML
         return "supervisor_vehicles_section";
     }
 
@@ -101,9 +97,6 @@ public class SupervisorController {
         }
     }
 
-    // ============================================
-    // SECCIÓN: Mantenimientos (reportar daños)
-    // ============================================
     @GetMapping("/maintenance")
     public String maintenanceSection(Model model) {
         List<Vehicle> vehicles = vehicleService.getAllVehicles();

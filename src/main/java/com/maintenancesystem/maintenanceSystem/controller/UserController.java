@@ -2,6 +2,7 @@ package com.maintenancesystem.maintenanceSystem.controller;
 
 import com.maintenancesystem.maintenanceSystem.entity.User;
 import com.maintenancesystem.maintenanceSystem.service.UserService;
+import com.maintenancesystem.maintenanceSystem.service.DriverService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,19 +16,21 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final DriverService driverService;
 
     @GetMapping
     public String users(Model model) {
         List<User> users = userService.getAllUser();
         model.addAttribute("users", users);
         model.addAttribute("newUser", new User());
+        model.addAttribute("drivers", driverService.getAllDriver()); // ← AGREGAR ESTA LÍNEA
         return "users";
     }
 
     @PostMapping
     public String saveUser(@ModelAttribute("newUser") User user) {
         userService.saveUser(user);
-        return "users";
+        return "redirect:/users";
     }
 
     @GetMapping("/delete/{id}")
@@ -35,6 +38,7 @@ public class UserController {
         boolean deleted = userService.deleteUser(id);
         model.addAttribute("users", userService.getAllUser());
         model.addAttribute("newUser", new User());
+        model.addAttribute("drivers", driverService.getAllDriver()); // ← AGREGAR ESTA LÍNEA
 
         return "users";
     }
@@ -45,9 +49,9 @@ public class UserController {
 
         model.addAttribute("users", userService.getAllUser());
         model.addAttribute("newUser", new User());
+        model.addAttribute("drivers", driverService.getAllDriver()); // ← AGREGAR ESTA LÍNEA
 
         return "users";
     }
 
 }
-

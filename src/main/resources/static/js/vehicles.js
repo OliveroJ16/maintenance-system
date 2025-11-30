@@ -36,9 +36,22 @@ window.editVehicle = function(button) {
 window.openAssignModal = function(button) {
     const vehicleId = button.getAttribute('data-id');
     const vehiclePlate = button.getAttribute('data-plate');
+    const hasDriver = button.getAttribute('data-has-driver') === 'true';
     
     document.getElementById('assignVehicleId').value = vehicleId;
     document.getElementById('assignVehiclePlate').value = vehiclePlate;
+    
+    // Cambiar título del modal según si es asignación o reasignación
+    const modalTitle = document.getElementById('assignModalTitle');
+    const submitBtn = document.getElementById('assignSubmitBtn');
+    
+    if (hasDriver) {
+        modalTitle.textContent = 'Reasignar Conductor';
+        submitBtn.textContent = 'Reasignar';
+    } else {
+        modalTitle.textContent = 'Asignar Conductor';
+        submitBtn.textContent = 'Asignar';
+    }
     
     // Fecha actual por defecto
     const today = new Date().toISOString().split('T')[0];
@@ -61,7 +74,7 @@ window.onclick = function(event) {
 };
 
 // -------------------------------------------
-// ⭐ FUNCIÓN REAL DE ASIGNAR (AHORA SÍ CON FETCH)
+// ⭐ FUNCIÓN REAL DE ASIGNAR/REASIGNAR
 // -------------------------------------------
 window.assignVehicle = async function(event) {
     event.preventDefault();
@@ -79,7 +92,7 @@ window.assignVehicle = async function(event) {
             closeAssignModal();
             
             Swal.fire({
-                title: '¡Conductor asignado!',
+                title: '¡Éxito!',
                 text: 'La asignación se completó correctamente.',
                 icon: 'success',
                 confirmButtonColor: '#6366f1'
@@ -107,5 +120,69 @@ window.assignVehicle = async function(event) {
             text: 'No se pudo contactar con el servidor.',
             confirmButtonColor: '#6366f1'
         });
+    }
+};
+
+// -------------------------------------------
+// ⭐ ELIMINAR ASIGNACIÓN
+// -------------------------------------------
+window.removeAssignment = async function(vehicleId) {
+    const result = await Swal.fire({
+        title: '¿Eliminar asignación?',
+        text: 'Se quitará el conductor asignado a este vehículo.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const formData = new FormData();
+            formData.append('vehicleId', vehicleId);
+
+            const response = await fetch('/vehicle-assignments/delete', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const text = await response.text();
+                
+                if (text === 'success') {
+                    Swal.fire({
+                        title: '¡Eliminada!',
+                        text: 'La asignación ha sido eliminada.',
+                        icon: 'success',
+                        confirmButtonColor: '#6366f1'
+                    });
+
+                    // Recargar la sección
+                    setTimeout(() => {
+                        loadSection('vehicles');
+                    }, 400);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se encontró la asignación.',
+                        confirmButtonColor: '#6366f1'
+                    });
+                }
+            } else {
+                throw new Error('Error en la respuesta');
+            }
+
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo eliminar la asignación.',
+                confirmButtonColor: '#6366f1'
+            });
+        }
     }
 };

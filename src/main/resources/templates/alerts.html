@@ -1,9 +1,9 @@
 <!-- alerts.html -->
 
-<!-- DASHBOARD PRINCIPAL - Página de inicio del sistema -->
+<!-- DASHBOARD PRINCIPAL -->
 <div class="header">
     <div class="header-left">
-        <h1 id="pageTitle">🔔 Dashboard de Alertas</h1>
+        <h1 id="pageTitle">Dashboard de Alertas</h1>
         <p id="pageDescription">Monitoreo en tiempo real del estado de mantenimientos</p>
     </div>
 </div>
@@ -60,7 +60,7 @@
     <div class="section-card urgent-section" th:if="${urgentAlerts != null && !#lists.isEmpty(urgentAlerts)}">
         <div class="section-header">
             <div class="section-title">
-                <h2>⚠️ Alertas Urgentes - Requieren Atención Inmediata</h2>
+                <h2>Alertas Urgentes - Requieren Atención Inmediata</h2>
                 <p>Alertas vencidas o próximas a vencer</p>
             </div>
         </div>
@@ -79,11 +79,20 @@
                         <small th:text="'Vehículo: ' + ${vehicle.brand} + ' ' + ${vehicle.model}">Toyota Corolla</small>
                     </div>
                 </div>
-                <button class="btn btn-danger btn-sm" 
-                        th:if="${!urgent.viewed}"
-                        th:onclick="'markAlertAsViewed(' + ${urgent.idAlert} + ')'">
-                    Marcar como Vista
-                </button>
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button class="btn btn-primary btn-sm" 
+                            onclick="openAttendModal(this)"
+                            th:data-alert-id="${urgent.idAlert}"
+                            th:data-vehicle-plate="${vehicle.plate}"
+                            th:data-vehicle-km="${vehicle.mileage}">
+                        Atender
+                    </button>
+                    <button class="btn btn-secondary btn-sm" 
+                            th:if="${!urgent.viewed}"
+                            th:onclick="'markAlertAsViewed(' + ${urgent.idAlert} + ')'">
+                        Marcar Vista
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -95,17 +104,6 @@
                 <h2>Alertas del Sistema</h2>
                 <p th:if="${filterType}" th:text="'Filtro activo: ' + ${filterType}">Todas las alertas ordenadas por prioridad</p>
                 <p th:unless="${filterType}">Todas las alertas ordenadas por prioridad</p>
-            </div>
-            <div class="header-actions">
-                <button class="btn btn-secondary" onclick="window.location.href='/alerts/urgent'">
-                    🔴 Ver Urgentes
-                </button>
-                <button class="btn btn-secondary" onclick="window.location.href='/alerts/unviewed'">
-                    👁️ Ver No Vistas
-                </button>
-                <button class="btn btn-primary" onclick="markAllAsViewed()">
-                    ✓ Marcar Todas Vistas
-                </button>
             </div>
         </div>
 
@@ -124,15 +122,13 @@
                         <th>Fecha</th>
                         <th>KM</th>
                         <th>Vista</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="alert : ${alerts}" 
                         th:classappend="${!alert.viewed ? 'unviewed-row' : ''}"
                         th:data-urgency="${alert.alertStatus.name() == 'VENCIDA' ? 'high' : 'normal'}"
-                        th:onclick="'markAlertAsViewed(' + ${alert.idAlert} + ')'"
-                        style="cursor: pointer;"
-                        title="Click para marcar como vista"
                         th:with="vehicle=${alert.maintenanceConfiguration != null ? alert.maintenanceConfiguration.vehicle : alert.vehicle}">
                         
                         <td>
@@ -157,7 +153,7 @@
                         
                         <td>
                             <div class="alert-message">
-                                <strong th:if="${!alert.viewed}">🔔 </strong>
+                                <strong th:if="${!alert.viewed}"></strong>
                                 <span th:text="${alert.message}">Mantenimiento próximo en 300 km</span>
                             </div>
                         </td>
@@ -167,15 +163,46 @@
                         <td th:text="${alert.kmAlert != null ? #numbers.formatInteger(alert.kmAlert, 0, 'COMMA') + ' km' : '—'}">5,000 km</td>
                         
                         <td>
-                            <span th:if="${alert.viewed}" class="status-badge completado">✓ SÍ</span>
-                            <span th:unless="${alert.viewed}" class="status-badge pendiente">✗ NO</span>
+                            <span th:if="${alert.viewed}" class="status-badge completado">SÍ</span>
+                            <span th:unless="${alert.viewed}" class="status-badge pendiente">NO</span>
+                        </td>
+                        
+                        <td>
+                            <div class="action-buttons">
+                                <!-- Botón Atender (solo si no está atendida) -->
+                                <button th:if="${alert.alertStatus.name() != 'ATENDIDA'}"
+                                        class="icon-btn edit"
+                                        onclick="openAttendModal(this)"
+                                        th:data-alert-id="${alert.idAlert}"
+                                        th:data-vehicle-plate="${vehicle.plate}"
+                                        th:data-vehicle-km="${vehicle.mileage}"
+                                        title="Atender alerta">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Botón Marcar como vista -->
+                                <button th:if="${!alert.viewed}"
+                                        class="icon-btn"
+                                        th:onclick="'markAlertAsViewed(' + ${alert.idAlert} + ')'"
+                                        title="Marcar como vista"
+                                        style="background: #3b82f6;">
+                                    <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     
                     <!-- Mensaje si no hay alertas -->
                     <tr th:if="${#lists.isEmpty(alerts)}">
-                        <td colspan="7" style="text-align: center; padding: 60px 20px;">
-                            <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">✅</div>
+                        <td colspan="8" style="text-align: center; padding: 60px 20px;">
+                            <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;"></div>
                             <h3 style="color: #10b981; margin-bottom: 8px;">¡Excelente! No hay alertas pendientes</h3>
                             <p style="color: #6b7280;">Todos los mantenimientos están al día</p>
                         </td>
@@ -183,5 +210,45 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Modal para Atender Alerta -->
+<div id="attendAlertModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Atender Alerta de Mantenimiento</h3>
+            <button class="close-btn" onclick="closeAttendModal()">&times;</button>
+        </div>
+
+        <form id="attendAlertForm" onsubmit="attendAlert(event)">
+            <input type="hidden" id="attendAlertId" name="alertId">
+
+            <div class="form-group">
+                <label>Vehículo</label>
+                <input type="text" id="attendVehiclePlate" readonly class="readonly-input">
+            </div>
+
+            <div class="form-group">
+                <label>Kilometraje de Ejecución</label>
+                <input type="number" id="attendExecutionKm" name="executionKm" required min="0">
+                <small id="kmHint" style="color: #6b7280; display: block; margin-top: 4px;"></small>
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de Ejecución</label>
+                <input type="date" id="attendExecutionDate" name="executionDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>Notas (Opcional)</label>
+                <textarea name="notes" rows="3" placeholder="Detalles del mantenimiento realizado..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeAttendModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Registrar Mantenimiento</button>
+            </div>
+        </form>
     </div>
 </div>

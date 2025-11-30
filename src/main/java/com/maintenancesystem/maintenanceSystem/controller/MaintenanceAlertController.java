@@ -4,6 +4,8 @@ import com.maintenancesystem.maintenanceSystem.entity.MaintenanceAlert;
 import com.maintenancesystem.maintenanceSystem.enums.AlertType;
 import com.maintenancesystem.maintenanceSystem.enums.AlertStatus;
 import com.maintenancesystem.maintenanceSystem.service.MaintenanceAlertService;
+import com.maintenancesystem.maintenanceSystem.service.MaintenanceTypeService;
+import com.maintenancesystem.maintenanceSystem.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +20,8 @@ import java.util.Map;
 public class MaintenanceAlertController {
 
     private final MaintenanceAlertService alertService;
+    private final VehicleService vehicleService;
+    private final MaintenanceTypeService maintenanceTypeService;
 
     /**
      * Dashboard principal - Muestra todas las alertas
@@ -31,6 +35,8 @@ public class MaintenanceAlertController {
         model.addAttribute("alerts", alerts);
         model.addAttribute("urgentAlerts", urgentAlerts);
         model.addAttribute("summary", summary);
+        model.addAttribute("vehicles", vehicleService.getAllVehicles());
+        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
 
         return "alerts";
     }
@@ -47,6 +53,8 @@ public class MaintenanceAlertController {
         model.addAttribute("urgentAlerts", alerts);
         model.addAttribute("summary", summary);
         model.addAttribute("filterType", "Urgentes");
+        model.addAttribute("vehicles", vehicleService.getAllVehicles());
+        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
 
         return "alerts";
     }
@@ -64,6 +72,8 @@ public class MaintenanceAlertController {
         model.addAttribute("urgentAlerts", urgentAlerts);
         model.addAttribute("summary", summary);
         model.addAttribute("filterType", "No Vistas");
+        model.addAttribute("vehicles", vehicleService.getAllVehicles());
+        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
 
         return "alerts";
     }
@@ -81,6 +91,8 @@ public class MaintenanceAlertController {
         model.addAttribute("urgentAlerts", urgentAlerts);
         model.addAttribute("summary", summary);
         model.addAttribute("filterType", "Preventivas");
+        model.addAttribute("vehicles", vehicleService.getAllVehicles());
+        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
 
         return "alerts";
     }
@@ -98,6 +110,8 @@ public class MaintenanceAlertController {
         model.addAttribute("urgentAlerts", urgentAlerts);
         model.addAttribute("summary", summary);
         model.addAttribute("filterType", "Correctivas");
+        model.addAttribute("vehicles", vehicleService.getAllVehicles());
+        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
 
         return "alerts";
     }
@@ -112,6 +126,7 @@ public class MaintenanceAlertController {
             alertService.markAsViewed(id);
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "error";
         }
     }
@@ -126,12 +141,13 @@ public class MaintenanceAlertController {
             alertService.markAllAsViewed();
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "error";
         }
     }
 
     /**
-     * Actualiza el estado de una alerta
+     * Actualiza el estado de una alerta (ATENDIDA, VENCIDA, etc)
      */
     @PostMapping("/update-status/{id}")
     @ResponseBody
@@ -141,12 +157,15 @@ public class MaintenanceAlertController {
             alertService.updateAlertStatus(id, alertStatus);
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "error";
         }
     }
 
+
+
     /**
-     * Genera alertas preventivas manualmente (para testing)
+     * Generar alertas preventivas manualmente (para testing)
      */
     @PostMapping("/generate-preventive")
     @ResponseBody
@@ -155,12 +174,13 @@ public class MaintenanceAlertController {
             alertService.generatePreventiveAlerts();
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "error: " + e.getMessage();
         }
     }
 
     /**
-     * Actualiza alertas vencidas manualmente (para testing)
+     * Actualizar alertas vencidas manualmente (para testing)
      */
     @PostMapping("/update-expired")
     @ResponseBody
@@ -169,6 +189,7 @@ public class MaintenanceAlertController {
             alertService.updateExpiredAlerts();
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "error: " + e.getMessage();
         }
     }

@@ -54,14 +54,25 @@
                         <td th:text="${v.fuelType}"></td>
                         
                         <td>
-                            <span th:if="${vehicleDrivers.containsKey(v.idVehicle)}" 
-                                  th:text="${vehicleDrivers.get(v.idVehicle)}"
-                                  class="driver-badge">
-                            </span>
-                            <span th:unless="${vehicleDrivers.containsKey(v.idVehicle)}" 
-                                  class="no-driver">
-                                Sin asignar
-                            </span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span th:if="${vehicleDrivers.containsKey(v.idVehicle)}" 
+                                      th:text="${vehicleDrivers.get(v.idVehicle)}"
+                                      class="driver-badge">
+                                </span>
+                                <span th:unless="${vehicleDrivers.containsKey(v.idVehicle)}" 
+                                      class="no-driver">
+                                    Sin asignar
+                                </span>
+                                
+                                <!-- Botón X para eliminar asignación (solo si tiene conductor) -->
+                                <button th:if="${vehicleDrivers.containsKey(v.idVehicle)}"
+                                        class="icon-btn-small delete"
+                                        th:onclick="'removeAssignment(' + ${v.idVehicle} + ')'"
+                                        title="Eliminar asignación"
+                                        style="padding: 2px 6px; font-size: 12px;">
+                                    ×
+                                </button>
+                            </div>
                         </td>
 
                         <td>
@@ -75,12 +86,13 @@
                         <td>
                             <div class="action-buttons">
 
-                                <!-- Botón Asignar Conductor -->
-                                <button class="icon-btn assign"
+                                <!-- Botón Asignar/Reasignar Conductor -->
+                                <button class="icon-btn edit"
                                         onclick="openAssignModal(this)"
                                         th:data-id="${v.idVehicle}"
                                         th:data-plate="${v.plate}"
-                                        title="Asignar Conductor">
+                                        th:data-has-driver="${vehicleDrivers.containsKey(v.idVehicle)}"
+                                        th:title="${vehicleDrivers.containsKey(v.idVehicle)} ? 'Reasignar Conductor' : 'Asignar Conductor'">
                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -307,7 +319,7 @@
 <div id="assignDriverModal" class="modal hidden">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Asignar Conductor</h3>
+            <h3 id="assignModalTitle">Asignar Conductor</h3>
             <button class="close-btn" onclick="closeAssignModal()">&times;</button>
         </div>
 
@@ -338,7 +350,7 @@
 
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeAssignModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Asignar</button>
+                <button type="submit" class="btn btn-primary" id="assignSubmitBtn">Asignar</button>
             </div>
         </form>
     </div>
