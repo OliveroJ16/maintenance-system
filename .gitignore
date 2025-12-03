@@ -38,3 +38,6 @@ build/
 .env.development
 .env.production
 
+# Logs de la aplicación
+logs/
+
