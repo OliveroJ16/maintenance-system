@@ -20,17 +20,17 @@ public class DriverService {
         return driverRepository.findAll();
     }
 
-    public void saveDriver(Driver driver){
+    public Driver saveDriver(Driver driver){
         driver.setFirstName(stringNormalizer.toTitleCase(driver.getFirstName()));
         driver.setLastName(stringNormalizer.toTitleCase(driver.getLastName()));
-        driverRepository.save(driver);
+        return driverRepository.save(driver);
     }
 
     public void deleteDriver(Integer id) {
         driverRepository.deleteById(id);
     }
 
-    public void updateDriver(Integer id, Driver driver) {
+    public Driver updateDriver(Integer id, Driver driver) {
         driver.setFirstName(stringNormalizer.toTitleCase(driver.getFirstName()));
         driver.setLastName(stringNormalizer.toTitleCase(driver.getLastName()));
         driverRepository.updatePartial(
@@ -44,6 +44,8 @@ public class DriverService {
                 driver.getLicenseExpirationDate(),
                 driver.getStatus()
         );
+
+        return driver;
     }
 
     public Driver getDriverById(Integer id) {

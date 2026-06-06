@@ -3,49 +3,49 @@ package com.maintenancesystem.maintenanceSystem.controller;
 import com.maintenancesystem.maintenanceSystem.entity.Driver;
 import com.maintenancesystem.maintenanceSystem.service.DriverService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/drivers")
+@RequestMapping("/api/drivers")
 public class DriverController {
 
     private final DriverService driverService;
 
     @GetMapping
-    public String drivers(Model model) {
-        List<Driver> drivers = driverService.getAllDriver();
-
-        model.addAttribute("drivers", drivers);
-        model.addAttribute("newDriver", new Driver());
-
-        return "drivers";
+    public ResponseEntity<List<Driver>> getAllDrivers() {
+        return ResponseEntity.ok(driverService.getAllDriver());
     }
 
     @PostMapping
-    public String saveDriver(@ModelAttribute("newDriver") Driver driver) {
-        driverService.saveDriver(driver);
-        return "drivers";
+    public ResponseEntity<Driver> saveDriver(@RequestBody Driver driver) {
+
+        Driver savedDriver = driverService.saveDriver(driver);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(savedDriver);
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteDriver(@PathVariable Integer id, Model model) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Driver> updateDriver(
+            @PathVariable Integer id,
+            @RequestBody Driver driver) {
+
+        Driver updatedDriver = driverService.updateDriver(id, driver);
+
+        return ResponseEntity.ok(updatedDriver);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDriver(@PathVariable Integer id) {
+
         driverService.deleteDriver(id);
-        model.addAttribute("drivers", driverService.getAllDriver());
-        model.addAttribute("newDriver", new Driver());
-        return "drivers";
-    }
 
-    @PostMapping("/update/{id}")
-    public String updateDriver(@PathVariable Integer id, @ModelAttribute("editDriver") Driver data, Model model) {
-        driverService.updateDriver(id, data);
-        model.addAttribute("drivers", driverService.getAllDriver());
-        model.addAttribute("newDriver", new Driver());
-        return "drivers";
+        return ResponseEntity.noContent().build();
     }
-
 }
