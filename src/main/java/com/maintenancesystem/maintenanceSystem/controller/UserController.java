@@ -2,56 +2,42 @@ package com.maintenancesystem.maintenanceSystem.controller;
 
 import com.maintenancesystem.maintenanceSystem.entity.User;
 import com.maintenancesystem.maintenanceSystem.service.UserService;
-import com.maintenancesystem.maintenanceSystem.service.DriverService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
-    private final DriverService driverService;
 
     @GetMapping
-    public String users(Model model) {
-        List<User> users = userService.getAllUser();
-        model.addAttribute("users", users);
-        model.addAttribute("newUser", new User());
-        model.addAttribute("drivers", driverService.getAllDriver()); // ← AGREGAR ESTA LÍNEA
-        return "users";
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUser());
     }
 
     @PostMapping
-    public String saveUser(@ModelAttribute("newUser") User user) {
-        userService.saveUser(user);
-        return "redirect:/users";
+    public ResponseEntity<User> saveUser(@RequestBody User user) {
+        User savedUser = userService.saveUser(user);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(savedUser);
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Integer id, Model model) {
-        boolean deleted = userService.deleteUser(id);
-        model.addAttribute("users", userService.getAllUser());
-        model.addAttribute("newUser", new User());
-        model.addAttribute("drivers", driverService.getAllDriver()); // ← AGREGAR ESTA LÍNEA
-
-        return "users";
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User user) {
+        User updatedUser = userService.updateUser(id, user);
+        return ResponseEntity.ok(updatedUser);
     }
 
-    @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable Integer id, @ModelAttribute("userEdit") User data, Model model) {
-        userService.updateUser(id, data);
-
-        model.addAttribute("users", userService.getAllUser());
-        model.addAttribute("newUser", new User());
-        model.addAttribute("drivers", driverService.getAllDriver()); // ← AGREGAR ESTA LÍNEA
-
-        return "users";
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
-
 }

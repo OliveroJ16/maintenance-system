@@ -19,18 +19,18 @@ public class WorkshopService {
         return workshopRepository.findAll();
     }
 
-    public void saveWorkshop(Workshop workshop){
+    public Workshop saveWorkshop(Workshop workshop){
         workshop.setWorkshopName(stringNormalizer.toTitleCase(workshop.getWorkshopName()));
         workshop.setAddress(stringNormalizer.toTitleCase(workshop.getAddress()));
         workshop.setSpecialty(stringNormalizer.toTitleCase(workshop.getSpecialty()));
-        workshopRepository.save(workshop);
+        return workshopRepository.save(workshop);
     }
 
     public void deleteWorkshop(Integer id) {
         workshopRepository.deleteById(id);
     }
 
-    public void updateWorkshop(Integer id, Workshop workshop){
+    public Workshop updateWorkshop(Integer id, Workshop workshop){
         workshop.setWorkshopName(stringNormalizer.toTitleCase(workshop.getWorkshopName()));
         workshop.setAddress(stringNormalizer.toTitleCase(workshop.getAddress()));
         workshop.setSpecialty(stringNormalizer.toTitleCase(workshop.getSpecialty()));
@@ -43,7 +43,7 @@ public class WorkshopService {
                 workshop.getSpecialty(),
                 workshop.getStatus()
         );
-
+        return workshop;
     }
 
     public Workshop getWorkshopById(Integer id) {

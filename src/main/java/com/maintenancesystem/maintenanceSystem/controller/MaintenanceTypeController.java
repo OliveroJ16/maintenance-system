@@ -1,59 +1,71 @@
 package com.maintenancesystem.maintenanceSystem.controller;
 
-import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
 import com.maintenancesystem.maintenanceSystem.entity.MaintenanceType;
-import com.maintenancesystem.maintenanceSystem.service.MaintenanceService;
 import com.maintenancesystem.maintenanceSystem.service.MaintenanceTypeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/maintenance-type")
+@RequestMapping("/api/maintenance-types")
 public class MaintenanceTypeController {
 
     private final MaintenanceTypeService maintenanceTypeService;
-    private final MaintenanceService maintenanceService;
 
     @GetMapping
-    public String maintenanceTypes(Model model){
-        List<MaintenanceType> maintenanceTypes = maintenanceTypeService.getAllMaintenanceType();
+    public ResponseEntity<List<MaintenanceType>> getAllMaintenanceTypes() {
+        return ResponseEntity.ok(
+                maintenanceTypeService.getAllMaintenanceType()
+        );
+    }
 
-        model.addAttribute("maintenanceTypes", maintenanceTypes);
-        model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
-        model.addAttribute("newMaintenance", new Maintenance());
+    @GetMapping("/{id}")
+    public ResponseEntity<MaintenanceType> getMaintenanceTypeById(
+            @PathVariable Integer id) {
 
-        return "maintenance";
+        return ResponseEntity.ok(
+                maintenanceTypeService.getMaintenanceTypeById(id)
+        );
     }
 
     @PostMapping
-    public String saveMaintenanceType(@ModelAttribute("newMaintenanceType") MaintenanceType maintenanceType) {
-        maintenanceTypeService.saveMaintenanceType(maintenanceType);
-        return "maintenance";
+    public ResponseEntity<MaintenanceType> saveMaintenanceType(
+            @RequestBody MaintenanceType maintenanceType) {
+
+        MaintenanceType saved =
+                maintenanceTypeService.saveMaintenanceType(maintenanceType);
+
+        return ResponseEntity
+                .created(URI.create("/api/maintenance-types/" + saved.getIdMaintenanceType()))
+                .body(saved);
     }
 
-    @PostMapping("/update/{id}")
-    public String updateMaintenanceType(@ModelAttribute("newMaintenanceType") MaintenanceType maintenanceType, @PathVariable("id") Integer id, Model model) {
-        maintenanceTypeService.updateMaintenanceType(maintenanceType, id);
-        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
-        model.addAttribute("newMaintenance", new Maintenance());
-        return "maintenance";
+    @PutMapping("/{id}")
+    public ResponseEntity<MaintenanceType> updateMaintenanceType(
+            @PathVariable Integer id,
+            @RequestBody MaintenanceType maintenanceType) {
+
+        MaintenanceType updated =
+                maintenanceTypeService.updateMaintenanceType(maintenanceType, id);
+
+        return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteMaintenanceType(@PathVariable Integer id, Model model){
-        maintenanceTypeService.deleteMaintenanceType(id);
-        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
-        model.addAttribute("newMaintenance", new Maintenance());
-        return "maintenance";
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMaintenanceType(
+            @PathVariable Integer id) {
+
+        boolean deleted =
+                maintenanceTypeService.deleteMaintenanceType(id);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }

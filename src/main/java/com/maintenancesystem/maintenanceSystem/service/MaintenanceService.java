@@ -1,8 +1,8 @@
 package com.maintenancesystem.maintenanceSystem.service;
 
 import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
-import com.maintenancesystem.maintenanceSystem.repository.MaintenanceRepository;
 import com.maintenancesystem.maintenanceSystem.enums.MaintenanceCategory;
+import com.maintenancesystem.maintenanceSystem.repository.MaintenanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,40 +20,61 @@ public class MaintenanceService {
     /**
      * Obtiene todos los mantenimientos
      */
+    @Transactional(readOnly = true)
     public List<Maintenance> getAllMaintenances() {
         return maintenanceRepository.findAll();
+    }
+
+    /**
+     * Obtiene un mantenimiento por ID
+     */
+    @Transactional(readOnly = true)
+    public Maintenance getMaintenanceById(Integer id) {
+        return maintenanceRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Mantenimiento no encontrado"));
     }
 
     /**
      * Guarda un nuevo mantenimiento y genera alerta si es correctivo
      */
     @Transactional
-    public void saveMaintenance(Maintenance maintenance) {
-        if (maintenance.getMaintenanceType() != null && maintenance.getMaintenanceType().getIdMaintenanceType() != null) {
+    public Maintenance saveMaintenance(Maintenance maintenance) {
+
+        if (maintenance.getMaintenanceType() != null
+                && maintenance.getMaintenanceType().getIdMaintenanceType() != null) {
+
             maintenance.setMaintenanceType(
-                    maintenanceTypeService.getById(maintenance.getMaintenanceType().getIdMaintenanceType())
+                    maintenanceTypeService.getById(
+                            maintenance.getMaintenanceType().getIdMaintenanceType()
+                    )
             );
         }
-        // Guardar el mantenimiento
-        Maintenance savedMaintenance = maintenanceRepository.save(maintenance);
 
-        // ✅ Si es mantenimiento CORRECTIVO, generar alerta automática
-        if (maintenance.getMaintenanceType() != null &&
-                maintenance.getMaintenanceType().getCategory() == MaintenanceCategory.CORRECTIVO) {
+        Maintenance savedMaintenance =
+                maintenanceRepository.save(maintenance);
+
+        // Generar alerta automática para mantenimientos correctivos
+        if (savedMaintenance.getMaintenanceType() != null
+                && savedMaintenance.getMaintenanceType().getCategory()
+                == MaintenanceCategory.CORRECTIVO) {
 
             alertService.generateCorrectiveAlert(savedMaintenance);
         }
+
+        return savedMaintenance;
     }
 
     /**
      * Actualiza un mantenimiento existente
      */
     @Transactional
-    public void updateMaintenance(Integer id, Maintenance maintenance) {
-        Maintenance existing = maintenanceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mantenimiento no encontrado"));
+    public Maintenance updateMaintenance(Integer id, Maintenance maintenance) {
 
-        // Actualizar campos necesarios
+        Maintenance existing = maintenanceRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Mantenimiento no encontrado"));
+
         existing.setScheduledDate(maintenance.getScheduledDate());
         existing.setScheduledKm(maintenance.getScheduledKm());
         existing.setExecutionDate(maintenance.getExecutionDate());
@@ -61,18 +82,19 @@ public class MaintenanceService {
         existing.setStatus(maintenance.getStatus());
         existing.setDescription(maintenance.getDescription());
 
-        maintenanceRepository.save(existing);
+        return maintenanceRepository.save(existing);
     }
 
     /**
      * Elimina un mantenimiento
      */
     @Transactional
-    public boolean deleteMaintenance(Integer id) {
+    public void deleteMaintenance(Integer id) {
+
         if (!maintenanceRepository.existsById(id)) {
-            return false;
+            throw new RuntimeException("Mantenimiento no encontrado");
         }
+
         maintenanceRepository.deleteById(id);
-        return true;
     }
 }

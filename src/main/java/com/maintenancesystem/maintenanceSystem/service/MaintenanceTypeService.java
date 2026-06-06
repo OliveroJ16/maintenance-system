@@ -5,6 +5,7 @@ import com.maintenancesystem.maintenanceSystem.repository.MaintenanceTypeReposit
 import com.maintenancesystem.maintenanceSystem.utils.StringNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,38 +13,70 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MaintenanceTypeService {
 
-    private final MaintenanceTypeRepository maintenanceTypeRespository;
+    private final MaintenanceTypeRepository maintenanceTypeRepository;
     private final StringNormalizer stringNormalizer;
 
-    public List<MaintenanceType> getAllMaintenanceType(){
-        return maintenanceTypeRespository.findAll();
+    @Transactional(readOnly = true)
+    public List<MaintenanceType> getAllMaintenanceType() {
+        return maintenanceTypeRepository.findAll();
     }
 
-    public void saveMaintenanceType(MaintenanceType maintenanceType){
-        maintenanceType.setTypeName(stringNormalizer.toTitleCase(maintenanceType.getTypeName()));
-        maintenanceType.setDescription(stringNormalizer.toTitleCase(maintenanceType.getDescription()));
-        maintenanceTypeRespository.save(maintenanceType);
+    @Transactional(readOnly = true)
+    public MaintenanceType getMaintenanceTypeById(Integer id) {
+        return maintenanceTypeRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Tipo de mantenimiento no encontrado con ID: " + id));
     }
 
-    public void deleteMaintenanceType(Integer id){
-        maintenanceTypeRespository.deleteById(id);
+    @Transactional
+    public MaintenanceType saveMaintenanceType(MaintenanceType maintenanceType) {
+
+        maintenanceType.setTypeName(
+                stringNormalizer.toTitleCase(maintenanceType.getTypeName()));
+
+        maintenanceType.setDescription(
+                stringNormalizer.toTitleCase(maintenanceType.getDescription()));
+
+        return maintenanceTypeRepository.save(maintenanceType);
     }
 
-    public void updateMaintenanceType(MaintenanceType maintenanceType, Integer id){
-        maintenanceType.setTypeName(stringNormalizer.toTitleCase(maintenanceType.getTypeName()));
-        maintenanceType.setDescription(stringNormalizer.toTitleCase(maintenanceType.getDescription()));
-        maintenanceTypeRespository.updatePartial(
-                id,
-                maintenanceType.getTypeName(),
-                maintenanceType.getDescription(),
-                maintenanceType.getCategory(),
-                maintenanceType.getPriority()
-        );
+    @Transactional
+    public MaintenanceType updateMaintenanceType(
+            MaintenanceType maintenanceType,
+            Integer id) {
+
+        MaintenanceType existing = getMaintenanceTypeById(id);
+
+        existing.setTypeName(
+                stringNormalizer.toTitleCase(maintenanceType.getTypeName()));
+
+        existing.setDescription(
+                stringNormalizer.toTitleCase(maintenanceType.getDescription()));
+
+        existing.setCategory(maintenanceType.getCategory());
+        existing.setPriority(maintenanceType.getPriority());
+
+        return maintenanceTypeRepository.save(existing);
     }
 
+    @Transactional
+    public boolean deleteMaintenanceType(Integer id) {
+
+        if (!maintenanceTypeRepository.existsById(id)) {
+            return false;
+        }
+
+        maintenanceTypeRepository.deleteById(id);
+        return true;
+    }
+
+    /**
+     * Compatibilidad con código existente.
+     * Puedes eliminarlo cuando sustituyas todas las llamadas por
+     * getMaintenanceTypeById().
+     */
+    @Transactional(readOnly = true)
     public MaintenanceType getById(Integer id) {
-        return maintenanceTypeRespository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tipo de mantenimiento no encontrado con ID: " + id));
+        return getMaintenanceTypeById(id);
     }
-
 }

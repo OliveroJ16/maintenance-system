@@ -5,59 +5,35 @@ import com.maintenancesystem.maintenanceSystem.entity.Workshop;
 import com.maintenancesystem.maintenanceSystem.service.ServiceService;
 import com.maintenancesystem.maintenanceSystem.service.WorkshopService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/services")
+@RequestMapping("/api/services")
 public class ServiceController {
 
     private final ServiceService serviceService;
     private final WorkshopService workshopService;
 
     @PostMapping
-    public String saveService(@ModelAttribute("newService") Service service, @RequestParam("workshopId") Integer workshopId, Model model) {
+    public ResponseEntity<Service> saveService(@RequestBody Service service, @RequestParam Integer workshopId) {
         Workshop workshop = workshopService.getWorkshopById(workshopId);
         service.setWorkshop(workshop);
-        serviceService.saveService(service);
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
-        model.addAttribute("newWorkshop", new Workshop());
-        model.addAttribute("newService", new Service());
-        model.addAttribute("editService", new Service());
-        model.addAttribute("services", List.of());
-
-        return "workshops";
+        Service savedService = serviceService.saveService(service);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedService);
     }
 
-    @PostMapping("/update/{id}")
-    public String updateService(@PathVariable Integer id,
-                                @ModelAttribute("editService") Service service,
-                                Model model) {
-        serviceService.updateService(service, id);
-
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
-        model.addAttribute("newWorkshop", new Workshop());
-        model.addAttribute("newService", new Service());
-        model.addAttribute("editService", new Service());
-        model.addAttribute("services", List.of());
-
-        return "workshops";
+    @PutMapping("/{id}")
+    public ResponseEntity<Service> updateService(@PathVariable Integer id, @RequestBody Service service) {
+        Service updatedService = serviceService.updateService(service, id);
+        return ResponseEntity.ok(updatedService);
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteService(@PathVariable Integer id, Model model) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteService(@PathVariable Integer id) {
         serviceService.deleteService(id);
-
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
-        model.addAttribute("newWorkshop", new Workshop());
-        model.addAttribute("newService", new Service());
-        model.addAttribute("editService", new Service());
-        model.addAttribute("services", List.of());
-
-        return "workshops";
+        return ResponseEntity.noContent().build();
     }
 }

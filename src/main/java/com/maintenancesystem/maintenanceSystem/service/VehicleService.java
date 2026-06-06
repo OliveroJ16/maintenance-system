@@ -20,17 +20,17 @@ public class VehicleService {
         return vehicleRepository.findAll();
     }
 
-    public void saveVehicle(Vehicle vehicle) {
+    public Vehicle saveVehicle(Vehicle vehicle) {
         vehicle.setModel(stringNormalizer.toTitleCase(vehicle.getModel()));
         vehicle.setBrand(stringNormalizer.toTitleCase(vehicle.getBrand()));
-        vehicleRepository.save(vehicle);
+        return vehicleRepository.save(vehicle);
     }
 
     public void deleteVehicle(Integer id) {
         vehicleRepository.deleteById(id);
     }
 
-    public void updateVehicle(Integer id, Vehicle vehicle) {
+    public Vehicle updateVehicle(Integer id, Vehicle vehicle) {
         vehicle.setModel(stringNormalizer.toTitleCase(vehicle.getModel()));
         vehicle.setBrand(stringNormalizer.toTitleCase(vehicle.getBrand()));
         vehicleRepository.updatePartial(
@@ -45,6 +45,7 @@ public class VehicleService {
                 vehicle.getModel(),
                 vehicle.getVehicleType()
         );
+        return vehicle;
     }
 
     public Vehicle getVehicleById(Integer id) {

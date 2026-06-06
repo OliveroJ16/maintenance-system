@@ -20,10 +20,12 @@ public class MaintenanceConfigurationService {
     private final VehicleRepository vehicleRepository;
     private final MaintenanceTypeRepository maintenanceTypeRepository;
 
+    @Transactional(readOnly = true)
     public List<MaintenanceConfiguration> getAllConfigurations() {
         return configRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public MaintenanceConfiguration getConfigurationById(Integer id) {
         return configRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Configuración no encontrada"));
@@ -31,12 +33,12 @@ public class MaintenanceConfigurationService {
 
     @Transactional
     public MaintenanceConfiguration saveConfiguration(MaintenanceConfiguration config) {
-        // Consultar el vehículo completo
+
         Vehicle vehicle = vehicleRepository.findById(config.getVehicle().getIdVehicle())
                 .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
 
-        // Consultar el tipo de mantenimiento completo
-        MaintenanceType maintenanceType = maintenanceTypeRepository.findById(config.getMaintenanceType().getIdMaintenanceType())
+        MaintenanceType maintenanceType = maintenanceTypeRepository
+                .findById(config.getMaintenanceType().getIdMaintenanceType())
                 .orElseThrow(() -> new RuntimeException("Tipo de mantenimiento no encontrado"));
 
         config.setVehicle(vehicle);
@@ -47,14 +49,14 @@ public class MaintenanceConfigurationService {
 
     @Transactional
     public MaintenanceConfiguration updateConfiguration(MaintenanceConfiguration config, Integer id) {
+
         MaintenanceConfiguration existing = getConfigurationById(id);
 
-        // Consultar el vehículo completo
         Vehicle vehicle = vehicleRepository.findById(config.getVehicle().getIdVehicle())
                 .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
 
-        // Consultar el tipo de mantenimiento completo
-        MaintenanceType maintenanceType = maintenanceTypeRepository.findById(config.getMaintenanceType().getIdMaintenanceType())
+        MaintenanceType maintenanceType = maintenanceTypeRepository
+                .findById(config.getMaintenanceType().getIdMaintenanceType())
                 .orElseThrow(() -> new RuntimeException("Tipo de mantenimiento no encontrado"));
 
         existing.setFrequencyKm(config.getFrequencyKm());
@@ -67,7 +69,13 @@ public class MaintenanceConfigurationService {
     }
 
     @Transactional
-    public void deleteConfiguration(Integer id) {
+    public boolean deleteConfiguration(Integer id) {
+
+        if (!configRepository.existsById(id)) {
+            return false;
+        }
+
         configRepository.deleteById(id);
+        return true;
     }
 }

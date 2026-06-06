@@ -1,83 +1,61 @@
 package com.maintenancesystem.maintenanceSystem.controller;
 
 import com.maintenancesystem.maintenanceSystem.entity.Maintenance;
-import com.maintenancesystem.maintenanceSystem.entity.MaintenanceConfiguration;
-import com.maintenancesystem.maintenanceSystem.entity.MaintenanceType;
-import com.maintenancesystem.maintenanceSystem.service.MaintenanceConfigurationService;
 import com.maintenancesystem.maintenanceSystem.service.MaintenanceService;
-import com.maintenancesystem.maintenanceSystem.service.MaintenanceTypeService;
-import com.maintenancesystem.maintenanceSystem.service.VehicleService;
-import com.maintenancesystem.maintenanceSystem.service.WorkshopService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.List;
+
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/maintenance")
+@RequestMapping("/api/maintenance")
 public class MaintenanceController {
 
     private final MaintenanceService maintenanceService;
-    private final MaintenanceTypeService maintenanceTypeService;
-    private final MaintenanceConfigurationService configService;
-    private final VehicleService vehicleService;
-    private final WorkshopService workshopService;
 
     @GetMapping
-    public String maintenances(Model model) {
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
-        model.addAttribute("newMaintenance", new Maintenance());
-        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("configs", configService.getAllConfigurations());
-        model.addAttribute("newConfig", new MaintenanceConfiguration());
-        model.addAttribute("vehicles", vehicleService.getAllVehicles());
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
+    public ResponseEntity<List<Maintenance>> getAllMaintenances() {
+        return ResponseEntity.ok(
+                maintenanceService.getAllMaintenances()
+        );
+    }
 
-        return "maintenance";
+    @GetMapping("/{id}")
+    public ResponseEntity<Maintenance> getMaintenanceById(
+            @PathVariable Integer id) {
+
+        return ResponseEntity.ok(
+                maintenanceService.getMaintenanceById(id)
+        );
     }
 
     @PostMapping
-    public String saveMaintenance(@ModelAttribute("newMaintenance") Maintenance maintenance, Model model) {
-        maintenanceService.saveMaintenance(maintenance);
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
-        model.addAttribute("newMaintenance", new Maintenance());
-        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("configs", configService.getAllConfigurations());
-        model.addAttribute("newConfig", new MaintenanceConfiguration());
-        model.addAttribute("vehicles", vehicleService.getAllVehicles());
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
-        return "maintenance";
+    public ResponseEntity<Maintenance> saveMaintenance(
+            @RequestBody Maintenance maintenance) {
+
+        return ResponseEntity.ok(
+                maintenanceService.saveMaintenance(maintenance)
+        );
     }
 
-    @PostMapping("/update/{id}")
-    public String updateMaintenance(@ModelAttribute("newMaintenance") Maintenance maintenance,
-                                    @PathVariable("id") Integer id, Model model) {
-        maintenanceService.updateMaintenance(id, maintenance);
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
-        model.addAttribute("newMaintenance", new Maintenance());
-        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("configs", configService.getAllConfigurations());
-        model.addAttribute("newConfig", new MaintenanceConfiguration());
-        model.addAttribute("vehicles", vehicleService.getAllVehicles());
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
-        return "maintenance";
+    @PutMapping("/{id}")
+    public ResponseEntity<Maintenance> updateMaintenance(
+            @PathVariable Integer id,
+            @RequestBody Maintenance maintenance) {
+
+        return ResponseEntity.ok(
+                maintenanceService.updateMaintenance(id, maintenance)
+        );
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteMaintenance(@PathVariable Integer id, Model model) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMaintenance(
+            @PathVariable Integer id) {
+
         maintenanceService.deleteMaintenance(id);
-        model.addAttribute("maintenances", maintenanceService.getAllMaintenances());
-        model.addAttribute("newMaintenance", new Maintenance());
-        model.addAttribute("maintenanceTypes", maintenanceTypeService.getAllMaintenanceType());
-        model.addAttribute("newMaintenanceType", new MaintenanceType());
-        model.addAttribute("configs", configService.getAllConfigurations());
-        model.addAttribute("newConfig", new MaintenanceConfiguration());
-        model.addAttribute("vehicles", vehicleService.getAllVehicles());
-        model.addAttribute("workshops", workshopService.getAllWorkshop());
-        return "maintenance";
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -14,17 +14,17 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final StringNormalizer stringNormalizer;
 
-    public List<com.maintenancesystem.maintenanceSystem.entity.Service> getAllService(Integer id){
+    public List<com.maintenancesystem.maintenanceSystem.entity.Service> getAllService(Integer id) {
         return serviceRepository.findByWorkshopId(id);
     }
 
-    public void saveService(com.maintenancesystem.maintenanceSystem.entity.Service service){
+    public com.maintenancesystem.maintenanceSystem.entity.Service saveService(com.maintenancesystem.maintenanceSystem.entity.Service service) {
         service.setServiceName(stringNormalizer.toTitleCase(service.getServiceName()));
         service.setDescription(stringNormalizer.toTitleCase(service.getDescription()));
-        serviceRepository.save(service);
+        return serviceRepository.save(service);
     }
 
-    public void updateService(com.maintenancesystem.maintenanceSystem.entity.Service service, Integer id) {
+    public com.maintenancesystem.maintenanceSystem.entity.Service updateService(com.maintenancesystem.maintenanceSystem.entity.Service service, Integer id) {
         service.setServiceName(stringNormalizer.toTitleCase(service.getServiceName()));
         service.setDescription(stringNormalizer.toTitleCase(service.getDescription()));
         serviceRepository.updatePartial(
@@ -35,11 +35,11 @@ public class ServiceService {
                 service.getDurationMinutes(),
                 service.getStatus()
         );
+
+        return serviceRepository.findById(id).orElseThrow(() -> new RuntimeException("Servicio con id " + id + " no encontrado"));
     }
 
-    public void deleteService(Integer id){
+    public void deleteService(Integer id) {
         serviceRepository.deleteById(id);
     }
-
-
 }

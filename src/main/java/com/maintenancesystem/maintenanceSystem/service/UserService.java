@@ -22,25 +22,20 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public void saveUser(User user) {
+    public User saveUser(User user) {
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         user.setFirstName(stringNormalizer.toTitleCase(user.getFirstName()));
         user.setLastName(stringNormalizer.toTitleCase(user.getLastName()));
         user.setRegistrationDate(LocalDateTime.now());
         user.setPassword(hashedPassword);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    public boolean deleteUser(Integer id) {
-        if (!userRepository.existsById(id)) {
-            return false;
-        }
-
+    public void deleteUser(Integer id) {
         userRepository.deleteById(id);
-        return true;
     }
 
-    public void updateUser(Integer id, User user) {
+    public User updateUser(Integer id, User user) {
         user.setFirstName(stringNormalizer.toTitleCase(user.getFirstName()));
         user.setLastName(stringNormalizer.toTitleCase(user.getLastName()));
         userRepository.updatePartial(
@@ -50,6 +45,8 @@ public class UserService {
                 user.getEmail(),
                 user.getRole()
         );
+
+        return user;
     }
 
 }

@@ -2,69 +2,40 @@ package com.maintenancesystem.maintenanceSystem.controller;
 
 import com.maintenancesystem.maintenanceSystem.entity.Vehicle;
 import com.maintenancesystem.maintenanceSystem.service.VehicleService;
-import com.maintenancesystem.maintenanceSystem.service.DriverService;
-import com.maintenancesystem.maintenanceSystem.service.VehicleAssignmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/vehicles")
+@RequestMapping("/api/vehicles")
 public class VehicleController {
 
     private final VehicleService vehicleService;
-    private final DriverService driverService;
-    private final VehicleAssignmentService assignmentService;
-
-    private Map<Integer, String> buildVehicleDrivers() {
-        Map<Integer, String> map = new HashMap<>();
-
-        assignmentService.getAllAssignments().forEach(a -> {
-            Integer vId = a.getId().getVehicleId();
-            String name = a.getDriver().getFirstName() + " " + a.getDriver().getLastName();
-
-            map.merge(vId, name, (oldVal, newVal) -> oldVal + ", " + newVal);
-        });
-
-        return map;
-    }
-
-    private void loadModel(Model model) {
-        model.addAttribute("vehicles", vehicleService.getAllVehicles());
-        model.addAttribute("newVehicle", new Vehicle());
-        model.addAttribute("drivers", driverService.getAllDriver());
-        model.addAttribute("vehicleDrivers", buildVehicleDrivers());
-    }
 
     @GetMapping
-    public String vehicles(Model model) {
-        loadModel(model);
-        return "vehicles";
+    public ResponseEntity<List<Vehicle>> getAllVehicles() {
+        return ResponseEntity.ok(vehicleService.getAllVehicles());
     }
 
     @PostMapping
-    public String saveVehicle(@ModelAttribute("newVehicle") Vehicle vehicle, Model model) {
-        vehicleService.saveVehicle(vehicle);
-        loadModel(model);
-        return "vehicles";
+    public ResponseEntity<Vehicle> saveVehicle(@RequestBody Vehicle vehicle) {
+        Vehicle savedVehicle = vehicleService.saveVehicle(vehicle);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedVehicle);
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteVehicle(@PathVariable Integer id, Model model) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Vehicle> updateVehicle(@PathVariable Integer id, @RequestBody Vehicle vehicle) {
+        Vehicle updatedVehicle = vehicleService.updateVehicle(id, vehicle);
+        return ResponseEntity.ok(updatedVehicle);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVehicle(@PathVariable Integer id) {
         vehicleService.deleteVehicle(id);
-        loadModel(model);
-        return "vehicles";
-    }
-
-    @PostMapping("/update/{id}")
-    public String updateVehicle(@PathVariable Integer id, @ModelAttribute("editVehicle") Vehicle data, Model model) {
-        vehicleService.updateVehicle(id, data);
-        loadModel(model);
-        return "vehicles";
+        return ResponseEntity.noContent().build();
     }
 }
