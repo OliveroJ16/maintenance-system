@@ -1,5 +1,7 @@
 package com.maintenancesystem.maintenanceSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.maintenancesystem.maintenanceSystem.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,6 +30,7 @@ public class User {
     private String lastName;
 
     @Column(name = "contrasena", nullable = false, length = 255)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -40,7 +43,9 @@ public class User {
     @Column(name = "fecha_registro", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime registrationDate;
 
-    @ManyToOne
-    @JoinColumn(name = "id_chofer", referencedColumnName = "id_chofer", foreignKey = @ForeignKey(name = "fk_usuario_chofer"), nullable = true)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_chofer", referencedColumnName = "id_chofer",
+            foreignKey = @ForeignKey(name = "fk_usuario_chofer"), nullable = true)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Driver driver;
 }
