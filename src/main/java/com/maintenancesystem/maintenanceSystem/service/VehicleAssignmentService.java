@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,31 +64,47 @@ public class VehicleAssignmentService {
             Integer vehicleId,
             Integer driverId,
             LocalDate assignmentDate) {
+        try {
+            List<VehicleAssignment> existing = assignmentRepository.findByIdVehicleId(vehicleId);
 
-        deleteAssignmentByVehicle(vehicleId);
+            if (!existing.isEmpty()) {
+                assignmentRepository.deleteAll(existing);
+                assignmentRepository.flush();
+            }
+            Vehicle vehicle = vehicleService.getVehicleById(vehicleId);
+            Driver driver = driverService.getDriverById(driverId);
 
-        Vehicle vehicle =
-                vehicleService.getVehicleById(vehicleId);
+            VehicleAssignmentId id = new VehicleAssignmentId(driverId, vehicleId);
 
-        Driver driver =
-                driverService.getDriverById(driverId);
+            VehicleAssignment assignment = new VehicleAssignment();
+            assignment.setId(id);
+            assignment.setVehicle(vehicle);
+            assignment.setDriver(driver);
+            assignment.setAssignmentDate(assignmentDate);
+            VehicleAssignment saved = assignmentRepository.save(assignment);
+            assignmentRepository.flush();
+            return saved;
 
-        VehicleAssignmentId id =
-                new VehicleAssignmentId(driverId, vehicleId);
-
-        VehicleAssignment assignment =
-                new VehicleAssignment();
-
-        assignment.setId(id);
-        assignment.setVehicle(vehicle);
-        assignment.setDriver(driver);
-        assignment.setAssignmentDate(assignmentDate);
-
-        return assignmentRepository.save(assignment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)
     public List<VehicleAssignment> getAllAssignments() {
         return assignmentRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Integer, String> getDriverNamesByVehicleMap() {
+        List<VehicleAssignment> assignments = assignmentRepository.findAll();
+
+        return assignments.stream()
+                .collect(Collectors.toMap(
+                        assignment -> assignment.getVehicle().getIdVehicle(),
+                        assignment -> assignment.getDriver().getFirstName() + " " + assignment.getDriver().getLastName(),
+                        (existing, replacement) -> replacement
+                ));
     }
 }
