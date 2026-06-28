@@ -5,6 +5,7 @@ import com.maintenancesystem.maintenanceSystem.entity.Vehicle;
 import com.maintenancesystem.maintenanceSystem.entity.VehicleAssignment;
 import com.maintenancesystem.maintenanceSystem.entity.VehicleAssignmentId;
 import com.maintenancesystem.maintenanceSystem.repository.VehicleAssignmentRepository;
+import com.maintenancesystem.maintenanceSystem.repository.VehicleRepository; // Inyectamos el repositorio
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +20,8 @@ import java.util.stream.Collectors;
 public class VehicleAssignmentService {
 
     private final VehicleAssignmentRepository assignmentRepository;
+    private final VehicleRepository vehicleRepository;
     private final DriverService driverService;
-    private final VehicleService vehicleService;
 
     @Transactional
     public VehicleAssignment saveAssignment(VehicleAssignment assignment) {
@@ -47,7 +48,6 @@ public class VehicleAssignmentService {
 
     @Transactional
     public void deleteAssignmentByVehicle(Integer vehicleId) {
-
         VehicleAssignment currentAssignment =
                 assignmentRepository.findByIdVehicleId(vehicleId)
                         .stream()
@@ -60,10 +60,7 @@ public class VehicleAssignmentService {
     }
 
     @Transactional
-    public VehicleAssignment assignVehicle(
-            Integer vehicleId,
-            Integer driverId,
-            LocalDate assignmentDate) {
+    public VehicleAssignment assignVehicle(Integer vehicleId, Integer driverId, LocalDate assignmentDate) {
         try {
             List<VehicleAssignment> existing = assignmentRepository.findByIdVehicleId(vehicleId);
 
@@ -71,7 +68,9 @@ public class VehicleAssignmentService {
                 assignmentRepository.deleteAll(existing);
                 assignmentRepository.flush();
             }
-            Vehicle vehicle = vehicleService.getVehicleById(vehicleId);
+            Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                    .orElseThrow(() -> new RuntimeException("Vehículo no encontrado con id: " + vehicleId));
+
             Driver driver = driverService.getDriverById(driverId);
 
             VehicleAssignmentId id = new VehicleAssignmentId(driverId, vehicleId);
@@ -81,6 +80,7 @@ public class VehicleAssignmentService {
             assignment.setVehicle(vehicle);
             assignment.setDriver(driver);
             assignment.setAssignmentDate(assignmentDate);
+
             VehicleAssignment saved = assignmentRepository.save(assignment);
             assignmentRepository.flush();
             return saved;

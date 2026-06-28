@@ -50,4 +50,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Integer> {
 
     Vehicle findByPlate(String plate);
 
+    long countByStatus(VehicleStatus status);
+
 }
