@@ -1,52 +1,15 @@
 package com.maintenancesystem.maintenanceSystem.service;
 
-import com.maintenancesystem.maintenanceSystem.entity.Workshop;
-import com.maintenancesystem.maintenanceSystem.repository.WorkshopRepository;
-import com.maintenancesystem.maintenanceSystem.utils.StringNormalizer;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
+import com.maintenancesystem.maintenanceSystem.dto.request.WorkshopRequestDTO;
+import com.maintenancesystem.maintenanceSystem.dto.response.WorkshopResponseDTO;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class WorkshopService {
+public interface WorkshopService {
+    List<WorkshopResponseDTO> getAllWorkshop();
+    WorkshopResponseDTO saveWorkshop(WorkshopRequestDTO workshopRequestDTO);
+    void deleteWorkshop(Integer id);
+    WorkshopResponseDTO updateWorkshop(Integer id, WorkshopRequestDTO workshopRequestDTO);
 
-    private final WorkshopRepository workshopRepository;
-    private final StringNormalizer stringNormalizer;
-
-    public List<Workshop> getAllWorkshop(){
-        return workshopRepository.findAll();
-    }
-
-    public Workshop saveWorkshop(Workshop workshop){
-        workshop.setWorkshopName(stringNormalizer.toTitleCase(workshop.getWorkshopName()));
-        workshop.setAddress(stringNormalizer.toTitleCase(workshop.getAddress()));
-        workshop.setSpecialty(stringNormalizer.toTitleCase(workshop.getSpecialty()));
-        return workshopRepository.save(workshop);
-    }
-
-    public void deleteWorkshop(Integer id) {
-        workshopRepository.deleteById(id);
-    }
-
-    public Workshop updateWorkshop(Integer id, Workshop workshop){
-        workshop.setWorkshopName(stringNormalizer.toTitleCase(workshop.getWorkshopName()));
-        workshop.setAddress(stringNormalizer.toTitleCase(workshop.getAddress()));
-        workshop.setSpecialty(stringNormalizer.toTitleCase(workshop.getSpecialty()));
-        workshopRepository.updatePartial(
-                id,
-                workshop.getWorkshopName(),
-                workshop.getAddress(),
-                workshop.getPhone(),
-                workshop.getEmail(),
-                workshop.getSpecialty(),
-                workshop.getStatus()
-        );
-        return workshop;
-    }
-
-    public Workshop getWorkshopById(Integer id) {
-        return workshopRepository.findById(id).orElseThrow();
-    }
+    //Este metodo debe ir en service
+    //WorkshopResponseDTO getWorkshopById(Integer id);
 }

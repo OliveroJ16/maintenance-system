@@ -1,6 +1,6 @@
 package com.maintenancesystem.maintenanceSystem.controller;
 
-import com.maintenancesystem.maintenanceSystem.dto.AssignmentRequest;
+import com.maintenancesystem.maintenanceSystem.dto.request.AssignmentRequestDTO;
 import com.maintenancesystem.maintenanceSystem.entity.VehicleAssignment;
 import com.maintenancesystem.maintenanceSystem.service.VehicleAssignmentService;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class VehicleAssignmentController {
     }
 
     @PostMapping
-    public ResponseEntity<VehicleAssignment> assignVehicle(@RequestBody AssignmentRequest request) {
+    public ResponseEntity<VehicleAssignment> assignVehicle(@RequestBody AssignmentRequestDTO request) {
         VehicleAssignment assignment = assignmentService.assignVehicle(
                 request.vehicleId(),
                 request.driverId(),

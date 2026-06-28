@@ -1,8 +1,7 @@
 package com.maintenancesystem.maintenanceSystem.controller;
 
-import com.maintenancesystem.maintenanceSystem.entity.Service;
-import com.maintenancesystem.maintenanceSystem.entity.Workshop;
-import com.maintenancesystem.maintenanceSystem.service.ServiceService;
+import com.maintenancesystem.maintenanceSystem.dto.request.WorkshopRequestDTO;
+import com.maintenancesystem.maintenanceSystem.dto.response.WorkshopResponseDTO;
 import com.maintenancesystem.maintenanceSystem.service.WorkshopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,22 +16,21 @@ import java.util.List;
 public class WorkshopController {
 
     private final WorkshopService workshopService;
-    private final ServiceService serviceService;
 
     @GetMapping
-    public ResponseEntity<List<Workshop>> getAllWorkshops() {
+    public ResponseEntity<List<WorkshopResponseDTO>> getAllWorkshops() {
         return ResponseEntity.ok(workshopService.getAllWorkshop());
     }
 
     @PostMapping
-    public ResponseEntity<Workshop> saveWorkshop(@RequestBody Workshop workshop) {
-        Workshop savedWorkshop = workshopService.saveWorkshop(workshop);
+    public ResponseEntity<WorkshopResponseDTO> saveWorkshop(@RequestBody WorkshopRequestDTO workshopDTO) {
+        WorkshopResponseDTO savedWorkshop = workshopService.saveWorkshop(workshopDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedWorkshop);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Workshop> updateWorkshop(@PathVariable Integer id, @RequestBody Workshop workshop) {
-        Workshop updatedWorkshop = workshopService.updateWorkshop(id, workshop);
+    public ResponseEntity<WorkshopResponseDTO> updateWorkshop(@PathVariable Integer id, @RequestBody WorkshopRequestDTO workshopDTO) {
+        WorkshopResponseDTO updatedWorkshop = workshopService.updateWorkshop(id, workshopDTO);
         return ResponseEntity.ok(updatedWorkshop);
     }
 
@@ -42,8 +40,9 @@ public class WorkshopController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/services")
-    public ResponseEntity<List<Service>> getWorkshopServices(@PathVariable Integer id) {
-        return ResponseEntity.ok(serviceService.getAllService(id));
-    }
+    //Este metodo debe ir en service
+//    // Dejamos tu endpoint aquí, respondiendo con la lista de DTOs limpios
+//    @GetMapping("/{id}/services")
+//    public ResponseEntity<List<ServiceResponseDTO>> getWorkshopServices(@PathVariable Integer id) {
+//        return ResponseEntity.ok(serviceService.getAllService(id));}
 }

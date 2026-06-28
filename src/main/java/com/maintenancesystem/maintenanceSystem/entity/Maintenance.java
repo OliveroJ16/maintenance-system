@@ -1,5 +1,6 @@
 package com.maintenancesystem.maintenanceSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.maintenancesystem.maintenanceSystem.enums.MaintenanceStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,19 +39,22 @@ public class Maintenance {
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_vehiculo", nullable = false,
             foreignKey = @ForeignKey(name = "fk_mantenimiento_vehiculo"))
+    @JsonIgnoreProperties({"maintenances", "assignments", "hibernateLazyInitializer", "handler"})
     private Vehicle vehicle;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_tipo_mant", nullable = false,
             foreignKey = @ForeignKey(name = "fk_mantenimiento_tipo"))
+    @JsonIgnoreProperties({"maintenances", "hibernateLazyInitializer", "handler"})
     private MaintenanceType maintenanceType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_taller",
             foreignKey = @ForeignKey(name = "fk_mantenimiento_taller"))
+    @JsonIgnoreProperties({"maintenances", "hibernateLazyInitializer", "handler"})
     private Workshop workshop;
 
     @Column(name = "fecha_creacion", insertable = false, updatable = false)
@@ -58,33 +62,21 @@ public class Maintenance {
 
     // ========== MÉTODOS DE CONVENIENCIA ==========
 
-    /**
-     * Obtiene la fecha del mantenimiento (ejecutada o programada)
-     */
     @Transient
     public LocalDate getMaintenanceDate() {
         return executionDate != null ? executionDate : scheduledDate;
     }
 
-    /**
-     * Obtiene el kilometraje del mantenimiento (ejecutado o programado)
-     */
     @Transient
     public Integer getKilometers() {
         return executionKm != null ? executionKm : scheduledKm;
     }
 
-    /**
-     * Verifica si el mantenimiento fue ejecutado
-     */
     @Transient
     public boolean isExecuted() {
         return executionDate != null;
     }
 
-    /**
-     * Verifica si es un mantenimiento completado
-     */
     @Transient
     public boolean isCompleted() {
         return status == MaintenanceStatus.COMPLETADO;

@@ -1,5 +1,6 @@
 package com.maintenancesystem.maintenanceSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,9 +28,11 @@ public class MaintenanceConfiguration {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_mant", nullable = false, foreignKey = @ForeignKey(name = "fk_configuracion_tipo_mantenimiento"))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private MaintenanceType maintenanceType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_vehiculo", nullable = false, foreignKey = @ForeignKey(name = "fk_configuracion_vehiculo"))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Vehicle vehicle;
 }

@@ -1,5 +1,6 @@
 package com.maintenancesystem.maintenanceSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.maintenancesystem.maintenanceSystem.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,5 +37,6 @@ public class Service {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_taller", nullable = false, foreignKey = @ForeignKey(name = "fk_servicio_taller"))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Workshop workshop;
 }
