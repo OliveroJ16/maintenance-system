@@ -40,9 +40,4 @@ public class WorkshopController {
         return ResponseEntity.noContent().build();
     }
 
-    //Este metodo debe ir en service
-//    // Dejamos tu endpoint aquí, respondiendo con la lista de DTOs limpios
-//    @GetMapping("/{id}/services")
-//    public ResponseEntity<List<ServiceResponseDTO>> getWorkshopServices(@PathVariable Integer id) {
-//        return ResponseEntity.ok(serviceService.getAllService(id));}
 }

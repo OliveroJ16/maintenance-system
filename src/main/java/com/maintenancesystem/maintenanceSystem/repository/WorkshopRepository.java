@@ -23,7 +23,7 @@ public interface WorkshopRepository extends JpaRepository<Workshop, Integer> {
             w.status = COALESCE(:status, w.status)
         WHERE w.idWorkshop = :idWorkshop
     """)
-    Workshop updatePartial(
+    void updatePartial(
             @Param("idWorkshop") Integer idWorkshop,
             @Param("workshopName") String workshopName,
             @Param("address") String address,

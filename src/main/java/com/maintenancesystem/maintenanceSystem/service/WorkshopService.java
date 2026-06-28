@@ -9,7 +9,4 @@ public interface WorkshopService {
     WorkshopResponseDTO saveWorkshop(WorkshopRequestDTO workshopRequestDTO);
     void deleteWorkshop(Integer id);
     WorkshopResponseDTO updateWorkshop(Integer id, WorkshopRequestDTO workshopRequestDTO);
-
-    //Este metodo debe ir en service
-    //WorkshopResponseDTO getWorkshopById(Integer id);
 }

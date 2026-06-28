@@ -46,8 +46,7 @@ public class WorkshopServiceImpl implements WorkshopService {
             throw new RuntimeException("Taller con id " + id + " no encontrado");
         }
         Workshop workshop = workshopMapper.toEntity(request);
-
-        Workshop workshopUpdate = workshopRepository.updatePartial(
+        workshopRepository.updatePartial(
                 id,
                 workshop.getWorkshopName(),
                 workshop.getAddress(),
@@ -56,14 +55,11 @@ public class WorkshopServiceImpl implements WorkshopService {
                 workshop.getSpecialty(),
                 workshop.getStatus()
         );
+
+        Workshop workshopUpdate = workshopRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Taller con id " + id + " no encontrado"));
+
         return workshopMapper.toResponseDTO(workshopUpdate);
     }
 
-    //Este metodo debe ir en service
-//    @Override
-//    public WorkshopResponseDTO getWorkshopById(Integer id) {
-//        Workshop workshop = workshopRepository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Taller con id " + id + " no encontrado"));
-//        return workshopMapper.toResponseDTO(workshop);
-//    }
 }
