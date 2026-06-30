@@ -1,11 +1,14 @@
 package com.maintenancesystem.maintenanceSystem.service;
 
+import com.maintenancesystem.maintenanceSystem.dto.response.DriverResponseDTO;
 import com.maintenancesystem.maintenanceSystem.entity.Driver;
 import com.maintenancesystem.maintenanceSystem.entity.Vehicle;
 import com.maintenancesystem.maintenanceSystem.entity.VehicleAssignment;
 import com.maintenancesystem.maintenanceSystem.entity.VehicleAssignmentId;
+import com.maintenancesystem.maintenanceSystem.mapper.DriverMapper;
 import com.maintenancesystem.maintenanceSystem.repository.VehicleAssignmentRepository;
-import com.maintenancesystem.maintenanceSystem.repository.VehicleRepository; // Inyectamos el repositorio
+import com.maintenancesystem.maintenanceSystem.repository.VehicleRepository;
+import com.maintenancesystem.maintenanceSystem.service.impl.DriverServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +24,8 @@ public class VehicleAssignmentService {
 
     private final VehicleAssignmentRepository assignmentRepository;
     private final VehicleRepository vehicleRepository;
-    private final DriverService driverService;
+    private final DriverServiceImpl driverService;
+    private final DriverMapper driverMapper;
 
     @Transactional
     public VehicleAssignment saveAssignment(VehicleAssignment assignment) {
@@ -68,10 +72,12 @@ public class VehicleAssignmentService {
                 assignmentRepository.deleteAll(existing);
                 assignmentRepository.flush();
             }
+
             Vehicle vehicle = vehicleRepository.findById(vehicleId)
                     .orElseThrow(() -> new RuntimeException("Vehículo no encontrado con id: " + vehicleId));
 
-            Driver driver = driverService.getDriverById(driverId);
+            DriverResponseDTO driverResponseDTO = driverService.getDriverById(driverId);
+            Driver driver = driverMapper.toEntity(driverResponseDTO);
 
             VehicleAssignmentId id = new VehicleAssignmentId(driverId, vehicleId);
 
