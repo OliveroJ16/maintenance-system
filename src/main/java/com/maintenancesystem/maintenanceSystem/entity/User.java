@@ -30,7 +30,6 @@ public class User {
     private String lastName;
 
     @Column(name = "contrasena", nullable = false, length = 255)
-    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
