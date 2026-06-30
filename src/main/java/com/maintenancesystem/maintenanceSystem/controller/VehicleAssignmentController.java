@@ -1,7 +1,7 @@
 package com.maintenancesystem.maintenanceSystem.controller;
 
 import com.maintenancesystem.maintenanceSystem.dto.request.AssignmentRequestDTO;
-import com.maintenancesystem.maintenanceSystem.entity.VehicleAssignment;
+import com.maintenancesystem.maintenanceSystem.dto.response.AssignmentResponseDTO;
 import com.maintenancesystem.maintenanceSystem.service.VehicleAssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,8 +19,18 @@ public class VehicleAssignmentController {
     private final VehicleAssignmentService assignmentService;
 
     @GetMapping
-    public ResponseEntity<List<VehicleAssignment>> getAllAssignments() {
+    public ResponseEntity<List<AssignmentResponseDTO>> getAllAssignments() {
         return ResponseEntity.ok(assignmentService.getAllAssignments());
+    }
+
+    @GetMapping("/vehicle/{vehicleId}")
+    public ResponseEntity<List<AssignmentResponseDTO>> getAssignmentsByVehicle(@PathVariable Integer vehicleId) {
+        return ResponseEntity.ok(assignmentService.getAssignmentsByVehicle(vehicleId));
+    }
+
+    @GetMapping("/driver/{driverId}")
+    public ResponseEntity<List<AssignmentResponseDTO>> getAssignmentsByDriver(@PathVariable Integer driverId) {
+        return ResponseEntity.ok(assignmentService.getAssignmentsByDriver(driverId));
     }
 
     @GetMapping("/driver-names")
@@ -30,17 +40,19 @@ public class VehicleAssignmentController {
     }
 
     @PostMapping
-    public ResponseEntity<VehicleAssignment> assignVehicle(@RequestBody AssignmentRequestDTO request) {
-        VehicleAssignment assignment = assignmentService.assignVehicle(
-                request.vehicleId(),
-                request.driverId(),
-                request.assignmentDate()
-        );
+    public ResponseEntity<AssignmentResponseDTO> assignVehicle(@RequestBody AssignmentRequestDTO request) {
+        AssignmentResponseDTO assignment = assignmentService.assignVehicle(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(assignment);
     }
 
-    @DeleteMapping("/{vehicleId}")
-    public ResponseEntity<Void> deleteAssignment(@PathVariable Integer vehicleId) {
+    @DeleteMapping("/{vehicleId}/{driverId}")
+    public ResponseEntity<Void> deleteAssignment(@PathVariable Integer vehicleId, @PathVariable Integer driverId) {
+        assignmentService.deleteAssignment(vehicleId, driverId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/vehicle/{vehicleId}")
+    public ResponseEntity<Void> deleteAssignmentByVehicle(@PathVariable Integer vehicleId) {
         assignmentService.deleteAssignmentByVehicle(vehicleId);
         return ResponseEntity.noContent().build();
     }
