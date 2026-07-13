@@ -15,38 +15,47 @@ import java.util.Optional;
 public interface MaintenanceRepository extends JpaRepository<Maintenance, Integer> {
 
     @Query("""
-    SELECT m
-    FROM Maintenance m
-    WHERE m.vehicle.idVehicle = :vehicleId
-      AND m.maintenanceType.idMaintenanceType = :typeId
-      AND m.status = 'COMPLETADO'
-    ORDER BY m.executionDate DESC, m.idMaintenance DESC
+        SELECT m
+        FROM Maintenance m
+        WHERE m.vehicle.idVehicle = :vehicleId
+          AND m.maintenanceType.idMaintenanceType = :typeId
+          AND m.status = 'COMPLETADO'
+        ORDER BY m.executionDate DESC, m.idMaintenance DESC
+    """)
+    Optional<Maintenance> findLastMaintenanceByVehicleAndType(@Param("vehicleId") Integer vehicleId, @Param("typeId") Integer typeId);
+
+    @Query("""
+        SELECT m FROM Maintenance m
+        WHERE (:startDate IS NULL OR m.scheduledDate >= :startDate)
+          AND (:endDate IS NULL OR m.scheduledDate <= :endDate)
+          AND (:status IS NULL OR m.status = :status)
+          AND (:vehicleId IS NULL OR m.vehicle.idVehicle = :vehicleId)
+        """)
+    List<Maintenance> filterMaintenancesDirectly(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("status") MaintenanceStatus status,
+            @Param("vehicleId") Integer vehicleId
+    );
+
+    @Query("""
+    SELECT m FROM Maintenance m
+    WHERE (:startDate IS NULL OR m.scheduledDate >= :startDate)
+      AND (:endDate IS NULL OR m.scheduledDate <= :endDate)
+      AND (:status IS NULL OR m.status = :status)
+      AND (:vehicleId IS NULL OR m.vehicle.idVehicle = :vehicleId)
+      AND (:workshopId IS NULL OR m.workshop.idWorkshop = :workshopId)
 """)
-    Optional<Maintenance> findLastMaintenanceByVehicleAndType(
+    List<Maintenance> filterMaintenancesWithWorkshopDirectly(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("status") MaintenanceStatus status,
             @Param("vehicleId") Integer vehicleId,
-            @Param("typeId") Integer typeId
+            @Param("workshopId") Integer workshopId
     );
 
-    List<Maintenance> findByVehicleIdVehicle(Integer vehicleId);
-    List<Maintenance> findByScheduledDateBetween(LocalDate startDate, LocalDate endDate);
-    List<Maintenance> findByStatus(String status);
+    long countByStatus(MaintenanceStatus status);
 
-    /**
-     * Busca mantenimientos por vehículo, tipo y estado
-     */
-    List<Maintenance> findByVehicleAndMaintenanceTypeAndStatus(
-            Vehicle vehicle,
-            MaintenanceType maintenanceType,
-            MaintenanceStatus status
-    );
+    List<Maintenance> findByVehicleAndMaintenanceTypeAndStatus(Vehicle vehicle, MaintenanceType maintenanceType, MaintenanceStatus status);
 
-    /**
-     * Busca mantenimientos por vehículo y estado
-     */
-    List<Maintenance> findByVehicleAndStatus(Vehicle vehicle, MaintenanceStatus status);
-
-    /**
-     * Busca mantenimientos por estado
-     */
-    List<Maintenance> findByStatus(MaintenanceStatus status);
 }
